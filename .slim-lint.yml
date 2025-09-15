@@ -1,0 +1,60 @@
+# Slim-lint configuration
+# Documentation: https://github.com/sds/slim-lint
+
+linters:
+  # Disable linters that are too strict for our use case
+  AttributeOrder:
+    enabled: false
+  
+  # Disable RuboCop linters that conflict with our style
+  RuboCop:
+    enabled: false
+  
+  # Enable useful linters
+  EmptyLines:
+    enabled: true
+    max_consecutive_empty_lines: 2
+  
+  LineLength:
+    enabled: true
+    max: 120
+  
+  RedundantDiv:
+    enabled: true
+  
+  Tab:
+    enabled: true
+  
+  TrailingWhitespace:
+    enabled: true
+
+# Exclude certain files/directories
+exclude:
+  - 'vendor/**/*'
+  - 'node_modules/**/*'
+  - 'tmp/**/*'
+  - 'log/**/*'
+
+# File patterns to include
+include:
+  - 'app/views/**/*.slim'
+
+# Global configuration
+all:
+  # Use 2 spaces for indentation
+  indentation: 2
+  
+  # Allow certain attributes order
+  attribute_order:
+    - class
+    - id
+    - data-*
+    - aria-*
+    - role
+    - type
+    - name
+    - value
+    - placeholder
+    - required
+    - disabled
+    - readonly
