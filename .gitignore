@@ -1,0 +1,58 @@
+# === Ruby / Rails ===
+*.gem
+*.rbc
+/.config
+/coverage/
+/InstalledFiles
+/pkg/
+/spec/reports/
+/test/tmp/
+/test/version_tmp/
+/tmp/
+*.log
+*.pid
+*.seed
+*.sqlite3
+*.sqlite3-journal
+
+# Rails specific
+/log/*
+!/log/.keep
+/tmp/*
+!/tmp/.keep
+/public/assets
+/public/packs
+/node_modules/
+/yarn-error.log
+
+# === Bundler / Gems ===
+/vendor/bundle
+Gemfile.lock
+
+# === Environment files ===
+.env
+.env.*.local
+credentials.yml.enc
+master.key
+
+# === Editor / IDE ===
+*.swp
+*.swo
+*.sublime-workspace
+*.sublime-project
+.idea/
+.vscode/
+*.iml
+
+# === OS generated files ===
+.DS_Store
+Thumbs.db
+
+# === Byebug / Pry ===
+.byebug_history
+
+# === NPM / Yarn ===
+/node_modules/
+/yarn-error.log
+/public/packs-test
+/public/packs

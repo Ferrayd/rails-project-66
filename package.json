@@ -1,0 +1,29 @@
+{
+  "name": "app",
+  "private": "true",
+  "dependencies": {
+    "@hotwired/stimulus": "^3.2.1",
+    "@hotwired/turbo-rails": "^7.3.0",
+    "@popperjs/core": "^2.11.7",
+    "bootstrap": "^5.2.3",
+    "bootstrap-icons": "^1.10.3",
+    "esbuild": "^0.17.13",
+    "eslint": "^7.32.0 || ^8.2.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-plugin-eslint-config": "^2.0.0",
+    "eslint-plugin-react-app": "^6.2.2",
+    "sass": "^1.60.0"
+  },
+  "scripts": {
+    "build": "esbuild app/javascript/*.* --bundle --sourcemap --outdir=app/assets/builds --public-path=assets",
+    "build:css": "sass ./app/assets/stylesheets/application.bootstrap.scss:./app/assets/builds/application.css --no-source-map --load-path=node_modules",
+    "lint:slim": "slim-lint app/views/",
+    "lint:slim:fix": "slim-lint app/views/ --fix"
+  },
+  "devDependencies": {
+    "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-jsx-a11y": "^6.5.1",
+    "eslint-plugin-react": "^7.28.0",
+    "eslint-plugin-react-hooks": "^4.3.0"
+  }
+}

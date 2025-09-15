@@ -1,0 +1,18 @@
+en:
+  errors:
+
+    not_found:
+      header: 404 Not Found
+      title: The page you were looking for doesn't exist
+      text: You may have mistyped the address or the page may have moved
+    unprocessable_entity:
+      header: 422 Unprocessable Entity
+      title: The change you wanted was rejected
+      text: Maybe you tried to change something you didn't have access to
+    server_error:
+      header: 500 Internal Server Error
+      title: We're sorry, but something went wrong
+      text: ''
+
+    show_error:
+      back_to_root: Back to root

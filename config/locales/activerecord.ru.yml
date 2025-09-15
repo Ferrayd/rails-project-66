@@ -1,0 +1,7 @@
+ru:
+  activerecord:
+    attributes:
+      user:
+        nickname: Ник
+        email: Email
+        token: Токен

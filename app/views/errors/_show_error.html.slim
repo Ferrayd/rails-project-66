@@ -1,0 +1,6 @@
+.card.border-secondary.mb-3.text-danger
+  h5.card-header.text-bg-danger #{header}
+  .card-body
+    h5.card-title #{title}
+    p.card-text #{text}
+    = link_to t(".back_to_root"), root_path, class: "btn btn-danger"
