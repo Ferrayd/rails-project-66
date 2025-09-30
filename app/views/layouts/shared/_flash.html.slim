@@ -1,0 +1,4 @@
+- flash.each do |type, message|
+  div[class=get_alert_class(type)]
+    = message
+    button.btn-close[aria-label="Close" data-bs-dismiss="alert" type="button"]

@@ -1,0 +1,4 @@
+== render partial: "mail",
+  locals: { lines: t(".lines", user_name: @user.nickname, \
+                     repo_full_name: @repo_full_name, repo_link: @check.repository.link, \
+                     check_link: repository_check_url(@check.repository, @check)) }

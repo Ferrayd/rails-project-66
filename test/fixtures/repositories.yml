@@ -1,0 +1,17 @@
+one:
+  name: test
+  github_id: 1
+  full_name: test/test_1
+  owner_name: test
+  language: Ruby
+  link: http://example.com/repo1
+  user: user
+
+two:
+  name: test
+  github_id: 2
+  full_name: test/test_2
+  owner_name: test
+  language: Ruby
+  link: http://example.com/repo2
+  user: user

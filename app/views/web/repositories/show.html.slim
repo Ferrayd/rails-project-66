@@ -1,0 +1,41 @@
+- full_name = @repository.full_name
+- repo_created_at = @repository.repo_created_at
+- repo_updated_at = @repository.repo_updated_at
+
+.mb-4
+  h1
+    = full_name
+= link_to t(".Check"), repository_checks_path(@repository), data: { turbo_method: :post },
+    class: class_names("btn btn-primary mb-4", { disabled: @repository.checks.last&.pending? })
+p
+  strong.me-2
+    = t(".Name")
+  = full_name
+p
+  strong.me-2
+    = t(".Language")
+  = @repository.language
+p
+  strong.me-2
+    = t(".date_of_creation")
+  = repo_created_at && l(repo_created_at.localtime)
+p
+  strong.me-2
+    = t(".update_date")
+  = repo_updated_at && l(repo_updated_at.localtime)
+hr
+table.table.table-striped
+  thead
+    tr
+      th[scope="col"]
+      th[scope="col"]
+        = t(".check_status")
+      th[scope="col"]
+        = t(".commit_id")
+      th[scope="col"]
+        = t(".check_passed?")
+      th[scope="col"]
+        = t(".checked_at")
+  tbody
+
+    == render partial: "check", collection: @checks

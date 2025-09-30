@@ -1,0 +1,85 @@
+ru:
+  user_not_authenticated: Вам необходимо войти в систему для выполнения этого действия
+  user_not_authorized: Вы не авторизованы для выполнения этого действия
+  user_not_admin: Вам необходимо быть администратором для выполнения этого действия
+
+  repo_check_states:
+    created: Запущена
+    fetching: Загружается репозиторий
+    fetched: Репозиторий загружен
+    checking: Проверяется репозиторий
+    checked: Репозиторий проверен
+    parsing: Парсятся результаты линтинга
+    parsed: Парсинг результатов завершён
+    finished: Завершена
+    failed: Завершена с ошибкой
+
+  layouts:
+    shared:
+      head:
+        title: Github Quality Project
+      nav:
+        main: Главная
+        repositories: Репозитории
+        log_out: Выйти
+        log_in: Войти
+
+  web:
+
+    auth:
+      callback:
+        signed_in: Выполнен вход
+      logout:
+        signed_out: Выполнен выход
+
+    home:
+      index:
+        lines_array:
+        - Анализатор качества репозиториев
+        - Проект, который помогает автоматически следить за качеством репозиториев на Github. Он отслеживает изменения и прогоняет их через встроенные анализаторы. Затем формирует отчеты и отправляет их пользователю.
+        - Узнать больше на Хекслете
+
+    repositories:
+      repository:
+        no_checks_yet: Проверок еще не было
+        verification_not_completed_yet: Проверка еще не завершена
+      check:
+        verification_not_completed_yet: Проверка еще не завершена
+      index:
+        new: Добавить
+        name: Название
+        language: Язык
+        result_of_the_last_check: Результат последней проверки
+        number_of_violations: Количество замечаний
+      new:
+        title: "Выберите репозиторий"
+        submit: Добавить выбранный репозиторий
+      create:
+        repository_has_not_been_added: Репозиторий не был добавлен
+        repository_has_been_added: Репозиторий был добавлен
+      show:
+        Check: Проверить
+        Name: Название
+        Language: Язык
+        date_of_creation: Дата создания
+        update_date: Дата обновления
+        check_status: Статус проверки
+        commit_id: ID коммита
+        check_passed?: Проверка пройдена?
+        checked_at: Дата и время проверки
+
+      checks:
+        show:
+          go_to_repository: Перейти к репозиторию
+          "Check #": "Проверка #%{count}"
+          checked_at: Дата и время проверки
+          Status: Статус
+          check_passed?: Проверка пройдена?
+          number_of_violations: Количество замечаний
+          commit_id: ID коммита
+          Message: Сообщение
+          rule_id: Идентификатор правила
+          "Line:Column": Строка и символ
+        create:
+          wait_for_the_previous_check_to_complete: Дождитесь завершения предыдущей проверки
+          check_created: Проверка запущена

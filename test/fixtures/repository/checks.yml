@@ -1,0 +1,13 @@
+test:
+  repository: two
+  aasm_state: created
+  passed: false
+  check_results:
+    files:
+      - path: test.rb
+        offenses:
+          - cop: SomeCop
+            message: Fix this
+            location:
+              line: 1
+              column: 1

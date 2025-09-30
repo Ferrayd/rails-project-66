@@ -1,0 +1,22 @@
+ru:
+  user_mailer:
+    repo_check_failed:
+      subject: "Проверка репозитория /%{repo_full_name}/ линтером завершилась с ошибками!"
+      lines_html:
+      - "Привет, <b>%{user_name}</b>!"
+      - "Последняя проверка репозитория <a href=\"%{repo_link}\">%{repo_full_name}</a> завершилась с ошибками!"
+      - "Отчёт о проверке здесь: <a href=\"%{check_link}\">%{check_link}</a>"
+      lines:
+      - "Привет, %{user_name}!"
+      - "Последняя проверка репозитория %{repo_link} завершилась с ошибками!"
+      - "Отчёт о проверке здесь: %{check_link}"
+    repo_check_verification_failed:
+      subject: "Проверка репозитория /%{repo_full_name}/ линтером завершилась: проверка не пройдена."
+      lines_html:
+      - "Привет, <b>%{user_name}</b>!"
+      - "Последняя проверка репозитория <a href=\"%{repo_link}\">%{repo_full_name}</a> завершилась: проверка не пройдена."
+      - "Результаты проверки здесь: <a href=\"%{check_link}\">%{check_link}</a>"
+      lines:
+      - "Привет, %{user_name}!"
+      - "Последняя проверка репозитория %{repo_link} завершилась: проверка не пройдена."
+      - "Результаты проверки здесь: %{check_link}"

@@ -1,0 +1,22 @@
+en:
+  user_mailer:
+    repo_check_failed:
+      subject: "Checking the /%{repo_full_name}/ repository with a linter failed!"
+      lines_html:
+      - "Hi there, <b>%{user_name}</b>!"
+      - "Last check for repository <a href=\"%{repo_link}\">%{repo_full_name}</a> has failed!"
+      - "Access your check report here: <a href=\"%{check_link}\">%{check_link}</a>"
+      lines:
+      - "Hi there, %{user_name}!"
+      - "Last check for repository %{repo_link} has failed!"
+      - "Access your check report here: %{check_link}"
+    repo_check_verification_failed:
+      subject: "Checking the /%{repo_full_name}/ repository with a linter finished: verification failed."
+      lines_html:
+      - "Hi there, <b>%{user_name}</b>!"
+      - "Last check for repository <a href=\"%{repo_link}\">%{repo_full_name}</a> has finished: verification failed."
+      - "Access your check results here: <a href=\"%{check_link}\">%{check_link}</a>"
+      lines:
+      - "Hi there, %{user_name}!"
+      - "Last check for repository %{repo_link} has finished: verification failed."
+      - "Access your check results here: %{check_link}"
