@@ -15,7 +15,7 @@
         li.nav-item
           = link_to current_user.email, "#", class: "nav-link text-secondary"
         li.nav-item
-          = button_to t(".log_out"), auth_logout_path, method: :delete, class: "nav-link link-dark"
+          = button_to t(".log_out"), logout_path, method: :delete, class: "nav-link link-dark"
       - else
         li.nav-item
           = button_to auth_request_path(:github), data: { turbo: "false" }, class: "nav-link text-dark" do

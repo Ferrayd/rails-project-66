@@ -5,4 +5,5 @@ head
   = csp_meta_tag
   = stylesheet_link_tag "application", "data-turbo-track": "reload"
   = javascript_include_tag "application", "data-turbo-track": "reload", defer: true
-  = favicon_link_tag "icon.png"
+  / Use a static public icon to avoid asset pipeline dependency in tests
+  link rel="icon" href="/icon.svg"

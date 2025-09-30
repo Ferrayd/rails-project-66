@@ -60,3 +60,42 @@ module ActionDispatch
     end
   end
 end
+
+# Register test doubles in the DI container to avoid external calls
+ApplicationContainer.register(:octokit_client) do
+  Class.new do
+    def initialize(access_token:, auto_paginate: true); end
+    def repo(_id)
+      {
+        html_url: 'https://github.com/example/repo',
+        owner: { login: 'owner' },
+        name: 'repo',
+        full_name: 'owner/repo',
+        language: 'ruby',
+        created_at: Time.now,
+        updated_at: Time.now
+      }
+    end
+    def repos
+      [
+        { id: 123456, full_name: 'owner/repo', language: 'ruby' }
+      ]
+    end
+  end
+end
+
+ApplicationContainer.register(:fetch_repo_data) do
+  ->(_repository, _tmp_path) { 'abcdef0' }
+end
+
+ApplicationContainer.register(:lint_check) do
+  ->(_tmp_path, _parser_class) { '{}' }
+end
+
+# Stub webhook creation to avoid external API calls
+class CreateRepositoryWebhookJob
+  def perform(repository)
+    # Stub implementation for tests
+    Rails.logger.debug { "Webhook creation stubbed for repository #{repository.id}" }
+  end
+end
