@@ -101,7 +101,7 @@ class CreateRepositoryWebhookJob
 end
 
 # WebMock stubs for GitHub API calls
-# HTTParty requests (used in fetch_repo_data function)
+# HTTParty requests (used in fetch_repo_data function) - any repository commits
 WebMock.stub_request(:get, /api\.github\.com\/repos\/.*\/commits/)
   .with(
     headers: {
@@ -116,7 +116,7 @@ WebMock.stub_request(:get, /api\.github\.com\/repos\/.*\/commits/)
     headers: { 'Content-Type' => 'application/json' }
   )
 
-# Octokit requests for user repos
+# Octokit requests for user repos - any user repos request
 WebMock.stub_request(:get, /api\.github\.com\/user\/repos/)
   .with(
     headers: {
@@ -144,7 +144,7 @@ WebMock.stub_request(:get, /api\.github\.com\/user\/repos/)
     headers: { 'Content-Type' => 'application/json' }
   )
 
-# Octokit requests for specific repositories
+# Octokit requests for specific repositories - any repository ID
 WebMock.stub_request(:get, /api\.github\.com\/repositories\/\d+/)
   .with(
     headers: {
@@ -167,5 +167,13 @@ WebMock.stub_request(:get, /api\.github\.com\/repositories\/\d+/)
       created_at: Time.now,
       updated_at: Time.now
     }.to_json,
+    headers: { 'Content-Type' => 'application/json' }
+  )
+
+# Additional stubs for any GitHub API requests that might be missed
+WebMock.stub_request(:get, /api\.github\.com\/.*/)
+  .to_return(
+    status: 200,
+    body: {}.to_json,
     headers: { 'Content-Type' => 'application/json' }
   )
