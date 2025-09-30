@@ -101,14 +101,32 @@ class CreateRepositoryWebhookJob
 end
 
 # WebMock stubs for GitHub API calls
+# HTTParty requests (used in fetch_repo_data function)
 WebMock.stub_request(:get, /api\.github\.com\/repos\/.*\/commits/)
+  .with(
+    headers: {
+      'Accept' => '*/*',
+      'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+      'User-Agent' => 'Ruby'
+    }
+  )
   .to_return(
     status: 200,
     body: [{ 'sha' => 'abcdef0123456789' }].to_json,
     headers: { 'Content-Type' => 'application/json' }
   )
 
+# Octokit requests for user repos
 WebMock.stub_request(:get, /api\.github\.com\/user\/repos/)
+  .with(
+    headers: {
+      'Accept' => 'application/vnd.github.v3+json',
+      'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+      'Authorization' => 'token 12345',
+      'Content-Type' => 'application/json',
+      'User-Agent' => 'Octokit Ruby Gem 5.6.1'
+    }
+  )
   .to_return(
     status: 200,
     body: [
@@ -126,7 +144,17 @@ WebMock.stub_request(:get, /api\.github\.com\/user\/repos/)
     headers: { 'Content-Type' => 'application/json' }
   )
 
+# Octokit requests for specific repositories
 WebMock.stub_request(:get, /api\.github\.com\/repositories\/\d+/)
+  .with(
+    headers: {
+      'Accept' => 'application/vnd.github.v3+json',
+      'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+      'Authorization' => 'token 12345',
+      'Content-Type' => 'application/json',
+      'User-Agent' => 'Octokit Ruby Gem 5.6.1'
+    }
+  )
   .to_return(
     status: 200,
     body: {
