@@ -99,3 +99,45 @@ class CreateRepositoryWebhookJob
     Rails.logger.debug { "Webhook creation stubbed for repository #{repository.id}" }
   end
 end
+
+# WebMock stubs for GitHub API calls
+WebMock.stub_request(:get, /api\.github\.com\/repos\/.*\/commits/)
+  .to_return(
+    status: 200,
+    body: [{ 'sha' => 'abcdef0123456789' }].to_json,
+    headers: { 'Content-Type' => 'application/json' }
+  )
+
+WebMock.stub_request(:get, /api\.github\.com\/user\/repos/)
+  .to_return(
+    status: 200,
+    body: [
+      {
+        id: 123456,
+        full_name: 'owner/repo',
+        language: 'ruby',
+        html_url: 'https://github.com/owner/repo',
+        owner: { login: 'owner' },
+        name: 'repo',
+        created_at: Time.now,
+        updated_at: Time.now
+      }
+    ].to_json,
+    headers: { 'Content-Type' => 'application/json' }
+  )
+
+WebMock.stub_request(:get, /api\.github\.com\/repositories\/\d+/)
+  .to_return(
+    status: 200,
+    body: {
+      id: 3504920930,
+      full_name: 'Hexlet/hexlet-cv',
+      language: 'ruby',
+      html_url: 'https://github.com/Hexlet/hexlet-cv',
+      owner: { login: 'Hexlet' },
+      name: 'hexlet-cv',
+      created_at: Time.now,
+      updated_at: Time.now
+    }.to_json,
+    headers: { 'Content-Type' => 'application/json' }
+  )
