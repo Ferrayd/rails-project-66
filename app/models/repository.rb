@@ -11,4 +11,15 @@ class Repository < ApplicationRecord
   extend Enumerize
 
   enumerize :language, in: %i[javascript ruby]
+
+  def language_parser_class
+    case language&.to_sym
+    when :ruby
+      RubyParser
+    when :javascript
+      JavascriptParser
+    else
+      DefaultParser
+    end
+  end
 end
