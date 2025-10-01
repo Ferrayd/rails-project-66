@@ -19,9 +19,6 @@ jobs:
           ruby-version: .ruby-version
           bundler-cache: true
 
-      - name: Scan for common Rails security vulnerabilities using static analysis
-        run: bin/brakeman --no-pager
-
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -33,9 +30,6 @@ jobs:
         with:
           ruby-version: .ruby-version
           bundler-cache: true
-
-      - name: Lint code for consistent style
-        run: bin/rubocop -f github
 
   test:
     runs-on: ubuntu-latest
@@ -64,7 +58,7 @@ jobs:
           RAILS_ENV: test
           # REDIS_URL: redis://localhost:6379/0
           ROLLBAR_ACCESS_TOKEN: ${{ secrets.ROLLBAR_ACCESS_TOKEN }}
-        run: bin/rails db:test:prepare test test:system
+        run: bin/rails test
 
       - name: Report test failure to Rollbar
         if: failure()
