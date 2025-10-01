@@ -24,20 +24,54 @@ OmniAuth.config.mock_auth[:github] = OmniAuth::AuthHash.new(
 
 def stub_github_api_requests
   stub_request(:get, %r{https://api.github.com/repositories/\d+})
+    .with(
+      headers: {
+        'Accept' => 'application/vnd.github.v3+json',
+        'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+        'Authorization' => 'token 12345',
+        'Content-Type' => 'application/json',
+        'User-Agent' => 'Octokit Ruby Gem 5.6.1'
+      }
+    )
     .to_return(
       status: 200,
       body: {
-        id: 123,
-        full_name: "Hexlet/hexlet-cv",
-        language: "ruby"
+        id: 1684792940,
+        html_url: "https://github.com/user/test-repo",
+        owner: { login: "user" },
+        name: "test-repo",
+        full_name: "user/test-repo",
+        language: "ruby",
+        created_at: "2023-01-01T00:00:00Z",
+        updated_at: "2023-01-02T00:00:00Z"
       }.to_json,
       headers: { "Content-Type" => "application/json" }
     )
 
   stub_request(:get, "https://api.github.com/user/repos?per_page=100")
+    .with(
+      headers: {
+        'Accept' => 'application/vnd.github.v3+json',
+        'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+        'Authorization' => 'token 12345',
+        'Content-Type' => 'application/json',
+        'User-Agent' => 'Octokit Ruby Gem 5.6.1'
+      }
+    )
     .to_return(
       status: 200,
-      body: [].to_json,
+      body: [
+        {
+          id: 1684792940,
+          full_name: "user/test-repo",
+          language: "ruby",
+          html_url: "https://github.com/user/test-repo",
+          owner: { login: "user" },
+          name: "test-repo",
+          created_at: "2023-01-01T00:00:00Z",
+          updated_at: "2023-01-02T00:00:00Z"
+        }
+      ].to_json,
       headers: { "Content-Type" => "application/json" }
     )
 end
