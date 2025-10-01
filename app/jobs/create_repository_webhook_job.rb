@@ -12,7 +12,7 @@ class CreateRepositoryWebhookJob < ApplicationJob
       rescue WebMock::NetConnectNotAllowedError
         Rails.logger.debug { "Test environment: Webhook creation stubbed for repository #{repository.id}" }
         # Return mock webhook info to match expected format
-        { id: 1, url: "https://api.github.com/repos/testuser/test-repo/hooks/1", active: true }
+        { id: 1, url: 'https://api.github.com/repos/testuser/test-repo/hooks/1', active: true }
       end
     else
       github_client = initialize_github_client(repository)
@@ -34,7 +34,7 @@ class CreateRepositoryWebhookJob < ApplicationJob
   def create_webhook(github_client, repository)
     github_client.create_hook(
       repository.github_id,
-      "web",
+      'web',
       webhook_config,
       webhook_options
     )
@@ -43,8 +43,8 @@ class CreateRepositoryWebhookJob < ApplicationJob
   def webhook_config
     {
       url: Rails.application.routes.url_helpers.api_checks_url,
-      content_type: "json",
-      insecure_ssl: Rails.env.production? ? "0" : "1"
+      content_type: 'json',
+      insecure_ssl: Rails.env.production? ? '0' : '1'
     }
   end
 

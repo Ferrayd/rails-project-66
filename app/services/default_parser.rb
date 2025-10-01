@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class DefaultParser
   def initialize(repository); end
 

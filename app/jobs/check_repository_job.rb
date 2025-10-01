@@ -21,7 +21,7 @@ class CheckRepositoryJob < ApplicationJob
       passed: results[:passed],
       number_of_violations: results[:violations].size,
       check_results: results,
-      aasm_state: "finished"
+      aasm_state: 'finished'
     )
   end
 end

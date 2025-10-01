@@ -12,10 +12,10 @@ class ApplicationController < ActionController::Base
   private
 
   def user_not_authorized
-    redirect_to root_path, alert: t("user_not_authorized")
+    redirect_to root_path, alert: t('user_not_authorized')
   end
 
   def user_not_authenticated
-    redirect_to root_path, alert: t("user_not_authenticated")
+    redirect_to root_path, alert: t('user_not_authenticated')
   end
 end

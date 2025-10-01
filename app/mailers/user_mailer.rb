@@ -18,6 +18,6 @@ class UserMailer < ApplicationMailer
     repo = @check.repository
     @repo_full_name = repo.full_name
     @user = repo.user
-    mail(to: @user.email, subject: t(".subject", repo_full_name: @repo_full_name))
+    mail(to: @user.email, subject: t('.subject', repo_full_name: @repo_full_name))
   end
 end

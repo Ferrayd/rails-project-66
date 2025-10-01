@@ -1,24 +1,24 @@
 # frozen_string_literal: true
 
-ENV["RAILS_ENV"] ||= "test"
-require_relative "../config/environment"
-require "rails/test_help"
+ENV['RAILS_ENV'] ||= 'test'
+require_relative '../config/environment'
+require 'rails/test_help'
 
-require "webmock/minitest"
+require 'webmock/minitest'
 WebMock.disable_net_connect!(allow_localhost: true)
 
 OmniAuth.config.test_mode = true
-OmniAuth.config.allowed_request_methods = [ :post, :get ]
+OmniAuth.config.allowed_request_methods = %i[post get]
 OmniAuth.config.silence_get_warning = true
 OmniAuth.config.mock_auth[:github] = OmniAuth::AuthHash.new(
-  provider: "github",
-  uid: "12345",
+  provider: 'github',
+  uid: '12345',
   info: {
-    nickname: "Github User",
-    email: "github@github.com"
+    nickname: 'Github User',
+    email: 'github@github.com'
   },
   credentials: {
-    token: "12345"
+    token: '12345'
   }
 )
 
@@ -26,53 +26,53 @@ def stub_github_api_requests
   stub_request(:get, %r{https://api.github.com/repositories/\d+})
     .with(
       headers: {
-        "Accept" => "application/vnd.github.v3+json",
-        "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
-        "Authorization" => "token 12345",
-        "Content-Type" => "application/json",
-        "User-Agent" => "Octokit Ruby Gem 5.6.1"
+        'Accept' => 'application/vnd.github.v3+json',
+        'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+        'Authorization' => 'token 12345',
+        'Content-Type' => 'application/json',
+        'User-Agent' => 'Octokit Ruby Gem 5.6.1'
       }
     )
     .to_return(
       status: 200,
       body: {
-        id: 1684792940,
-        html_url: "https://github.com/user/test-repo",
-        owner: { login: "user" },
-        name: "test-repo",
-        full_name: "user/test-repo",
-        language: "ruby",
-        created_at: "2023-01-01T00:00:00Z",
-        updated_at: "2023-01-02T00:00:00Z"
+        id: 1_684_792_940,
+        html_url: 'https://github.com/user/test-repo',
+        owner: { login: 'user' },
+        name: 'test-repo',
+        full_name: 'user/test-repo',
+        language: 'ruby',
+        created_at: '2023-01-01T00:00:00Z',
+        updated_at: '2023-01-02T00:00:00Z'
       }.to_json,
-      headers: { "Content-Type" => "application/json" }
+      headers: { 'Content-Type' => 'application/json' }
     )
 
-  stub_request(:get, "https://api.github.com/user/repos?per_page=100")
+  stub_request(:get, 'https://api.github.com/user/repos?per_page=100')
     .with(
       headers: {
-        "Accept" => "application/vnd.github.v3+json",
-        "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
-        "Authorization" => "token 12345",
-        "Content-Type" => "application/json",
-        "User-Agent" => "Octokit Ruby Gem 5.6.1"
+        'Accept' => 'application/vnd.github.v3+json',
+        'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+        'Authorization' => 'token 12345',
+        'Content-Type' => 'application/json',
+        'User-Agent' => 'Octokit Ruby Gem 5.6.1'
       }
     )
     .to_return(
       status: 200,
       body: [
         {
-          id: 1684792940,
-          full_name: "user/test-repo",
-          language: "ruby",
-          html_url: "https://github.com/user/test-repo",
-          owner: { login: "user" },
-          name: "test-repo",
-          created_at: "2023-01-01T00:00:00Z",
-          updated_at: "2023-01-02T00:00:00Z"
+          id: 1_684_792_940,
+          full_name: 'user/test-repo',
+          language: 'ruby',
+          html_url: 'https://github.com/user/test-repo',
+          owner: { login: 'user' },
+          name: 'test-repo',
+          created_at: '2023-01-01T00:00:00Z',
+          updated_at: '2023-01-02T00:00:00Z'
         }
       ].to_json,
-      headers: { "Content-Type" => "application/json" }
+      headers: { 'Content-Type' => 'application/json' }
     )
 end
 
@@ -98,8 +98,8 @@ module ActionDispatch
 
     def sign_in(user)
       auth_hash = OmniAuth::AuthHash.new(
-        provider: "github",
-        uid: "12345",
+        provider: 'github',
+        uid: '12345',
         info: {
           nickname: user.nickname,
           email: user.email
@@ -110,7 +110,7 @@ module ActionDispatch
       )
 
       OmniAuth.config.mock_auth[:github] = OmniAuth::AuthHash::InfoHash.new(auth_hash)
-      get callback_auth_url("github")
+      get callback_auth_url('github')
     end
 
     def signed_in?
@@ -123,7 +123,9 @@ module ActionDispatch
     end
 
     def current_user
-      @current_user ||= User.find_by(id: session[:user_id])
+      return @current_user if defined?(@current_user)
+
+      @current_user = User.find_by(id: session[:user_id])
     end
   end
 end
@@ -132,31 +134,33 @@ end
 ApplicationContainer.register(:octokit_client) do
   Class.new do
     def initialize(access_token:, auto_paginate: true); end
+
     def repo(_id)
       {
-        html_url: "https://github.com/example/repo",
-        owner: { login: "owner" },
-        name: "repo",
-        full_name: "owner/repo",
-        language: "ruby",
-        created_at: Time.now,
-        updated_at: Time.now
+        html_url: 'https://github.com/example/repo',
+        owner: { login: 'owner' },
+        name: 'repo',
+        full_name: 'owner/repo',
+        language: 'ruby',
+        created_at: Time.zone.now,
+        updated_at: Time.zone.now
       }
     end
+
     def repos
       [
-        { id: 123456, full_name: "owner/repo", language: "ruby" }
+        { id: 123_456, full_name: 'owner/repo', language: 'ruby' }
       ]
     end
   end
 end
 
 ApplicationContainer.register(:fetch_repo_data) do
-  ->(_repository, _tmp_path) { "abcdef0" }
+  ->(_repository, _tmp_path) { 'abcdef0' }
 end
 
 ApplicationContainer.register(:lint_check) do
-  ->(_tmp_path, _parser_class) { "{}" }
+  ->(_tmp_path, _parser_class) { '{}' }
 end
 
 # Stub webhook creation
@@ -167,46 +171,46 @@ class CreateRepositoryWebhookJob
 end
 
 # WebMock stubs for GitHub API calls
-WebMock.stub_request(:get, /api\.github\.com\/repos\/.*\/commits/).to_return(
+WebMock.stub_request(:get, %r{api\.github\.com/repos/.*/commits}).to_return(
   status: 200,
-  body: [ { "sha" => "abcdef0123456789" } ].to_json,
-  headers: { "Content-Type" => "application/json" }
+  body: [{ 'sha' => 'abcdef0123456789' }].to_json,
+  headers: { 'Content-Type' => 'application/json' }
 )
 
-WebMock.stub_request(:get, /api\.github\.com\/user\/repos/).to_return(
+WebMock.stub_request(:get, %r{api\.github\.com/user/repos}).to_return(
   status: 200,
   body: [
     {
-      id: 123456,
-      full_name: "owner/repo",
-      language: "ruby",
-      html_url: "https://github.com/owner/repo",
-      owner: { login: "owner" },
-      name: "repo",
-      created_at: Time.now,
-      updated_at: Time.now
+      id: 123_456,
+      full_name: 'owner/repo',
+      language: 'ruby',
+      html_url: 'https://github.com/owner/repo',
+      owner: { login: 'owner' },
+      name: 'repo',
+      created_at: Time.zone.now,
+      updated_at: Time.zone.now
     }
   ].to_json,
-  headers: { "Content-Type" => "application/json" }
+  headers: { 'Content-Type' => 'application/json' }
 )
 
-WebMock.stub_request(:get, /api\.github\.com\/repositories\/\d+/).to_return(
+WebMock.stub_request(:get, %r{api\.github\.com/repositories/\d+}).to_return(
   status: 200,
   body: {
-    id: 3504920930,
-    full_name: "Hexlet/hexlet-cv",
-    language: "ruby",
-    html_url: "https://github.com/Hexlet/hexlet-cv",
-    owner: { login: "Hexlet" },
-    name: "hexlet-cv",
-    created_at: Time.now,
-    updated_at: Time.now
+    id: 3_504_920_930,
+    full_name: 'Hexlet/hexlet-cv',
+    language: 'ruby',
+    html_url: 'https://github.com/Hexlet/hexlet-cv',
+    owner: { login: 'Hexlet' },
+    name: 'hexlet-cv',
+    created_at: Time.zone.now,
+    updated_at: Time.zone.now
   }.to_json,
-  headers: { "Content-Type" => "application/json" }
+  headers: { 'Content-Type' => 'application/json' }
 )
 
-WebMock.stub_request(:get, /api\.github\.com\/.*/).to_return(
+WebMock.stub_request(:get, %r{api\.github\.com/.*}).to_return(
   status: 200,
   body: {}.to_json,
-  headers: { "Content-Type" => "application/json" }
+  headers: { 'Content-Type' => 'application/json' }
 )

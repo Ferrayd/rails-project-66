@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 class Repository < ApplicationRecord
-  belongs_to :user, class_name: "User", inverse_of: :repositories
-  has_many :checks, class_name: "Repository::Check", dependent: :destroy
+  belongs_to :user, class_name: 'User', inverse_of: :repositories
+  has_many :checks, class_name: 'Repository::Check', dependent: :destroy
 
   scope :by_owner, ->(owner_user) { where(user_id: owner_user.id) }
 

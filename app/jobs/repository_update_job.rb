@@ -8,23 +8,23 @@ class RepositoryUpdateJob < ApplicationJob
     github_client = octokit_client_class.new(access_token: access_token, auto_paginate: true)
 
     github_repository_data = if Rails.env.test?
-      begin
-        github_client.repo(repository.github_id)
-      rescue WebMock::NetConnectNotAllowedError
-        {
-          id: repository.github_id,
-          html_url: "https://github.com/testuser/test-repo",
-          owner: { login: "testuser" },
-          name: "test-repo",
-          full_name: "testuser/test-repo",
-          language: "ruby",
-          created_at: Time.now,
-          updated_at: Time.now
-        }
-      end
-    else
-      github_client.repo(repository.github_id)
-    end
+                               begin
+                                 github_client.repo(repository.github_id)
+                               rescue WebMock::NetConnectNotAllowedError
+                                 {
+                                   id: repository.github_id,
+                                   html_url: 'https://github.com/testuser/test-repo',
+                                   owner: { login: 'testuser' },
+                                   name: 'test-repo',
+                                   full_name: 'testuser/test-repo',
+                                   language: 'ruby',
+                                   created_at: Time.zone.now,
+                                   updated_at: Time.zone.now
+                                 }
+                               end
+                             else
+                               github_client.repo(repository.github_id)
+                             end
 
     return false if github_repository_data.nil?
 
