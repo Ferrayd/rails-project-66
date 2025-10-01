@@ -1,11 +1,11 @@
 tr
   td[colspan="3"]
-    = link_to src_file["filePath"], "#{@repository.link}/tree/#{@check.commit_id}/#{src_file['filePath']}"
-- src_file["messages"].each do |message|
+    = link_to src_file['filePath'], "#{@repository.link}/tree/#{@check.commit_id}/#{src_file['filePath']}"
+- src_file['messages'].each do |message|
   tr
     td
-      = message["message"]
+      = message['message']
     td
-      = message["ruleId"]
+      = message['ruleId']
     td
-      = "#{message["line"]}:#{message["column"]}"
+      = "#{message['line']}:#{message['column']}"

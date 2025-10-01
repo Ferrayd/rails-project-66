@@ -1,23 +1,23 @@
 .container.mb-2
   .d-flex.flex-wrap.align-items-center.py-2.border-bottom
     .navbar.navbar-expand-md.navbar-light.me-auto
-      = link_to root_path, class: "navbar-brand me-md-4" do
-        i.bi.bi-git[style="font-size: 2rem; color: OrangeRed;"]
+      = link_to root_path, class: 'navbar-brand me-md-4' do
+        i.bi.bi-git[style='font-size: 2rem; color: OrangeRed;']
       #navbarToggler.collapse.navbar-collapse
         ul.nav.nav-pills.flex-grow-1.navbar-nav.me-auto
           li.nav-item.me-2
-            = link_to t(".main"), root_path, class: "nav-link text-dark"
+            = link_to t('.main'), root_path, class: 'nav-link text-dark'
           - if signed_in?
             li.nav-item.me-2
-              = link_to t(".repositories"), repositories_path, class: "nav-link text-dark"
+              = link_to t('.repositories'), repositories_path, class: 'nav-link text-dark'
     ul.nav.nav-pills
       - if signed_in?
         li.nav-item
-          = link_to current_user.email, "#", class: "nav-link text-secondary"
+          = link_to current_user.email, '#', class: 'nav-link text-secondary'
         li.nav-item
-          = button_to t(".log_out"), logout_path, method: :delete, class: "nav-link link-dark"
+          = button_to t('.log_out'), logout_path, method: :delete, class: 'nav-link link-dark'
       - else
         li.nav-item
-          = button_to auth_request_path(:github), data: { turbo: "false" }, class: "nav-link text-dark" do
+          = button_to auth_request_path(:github), data: { turbo: 'false' }, class: 'nav-link text-dark' do
             span.bi.bi-github.me-2
-            = t(".log_in")
+            = t('.log_in')

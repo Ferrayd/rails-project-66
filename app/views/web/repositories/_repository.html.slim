@@ -2,14 +2,14 @@
 
 tr
   td
-    = link_to repository.name || "-", repository
+    = link_to repository.name || '-', repository
   td
     = repository.language
   td
     - if last_check.nil?
-      = t(".no_checks_yet")
+      = t('.no_checks_yet')
     - elsif last_check.pending?
-      = t(".verification_not_completed_yet")
+      = t('.verification_not_completed_yet')
     - else
       = last_check.passed
   td

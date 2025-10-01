@@ -8,7 +8,7 @@ tr
       = link_to check.commit_id, "#{check.repository.link}/commit/#{check.commit_id}"
   td[scope="row"]
     - if check.pending?
-      = t(".verification_not_completed_yet")
+      = t('.verification_not_completed_yet')
     - else
       = check.passed
   td[scope="row"]
