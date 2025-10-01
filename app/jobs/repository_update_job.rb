@@ -5,7 +5,7 @@ class RepositoryUpdateJob < ApplicationJob
 
   def perform(repository, access_token)
     octokit_client_class = ApplicationContainer[:octokit_client]
-    github_client = octokit_client_class.new access_token: access_token, auto_paginate: true
+    github_client = octokit_client_class.new(access_token: access_token, auto_paginate: true)
     github_repository_data = github_client.repo(repository.github_id)
     return false if github_repository_data.nil?
 
