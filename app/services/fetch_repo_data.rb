@@ -20,6 +20,6 @@ class FetchRepoData
 
   def run_program(command)
     output, status = Open3.capture2e(command)
-    [output, status.exitstatus]
+    [ output, status.exitstatus ]
   end
 end

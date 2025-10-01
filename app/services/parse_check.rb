@@ -4,6 +4,6 @@ class ParseCheck
   def call(temporary_repository_path, language_parser_class, linting_results_json)
     violations = []
     count = 0
-    [violations, count]
+    [ violations, count ]
   end
 end

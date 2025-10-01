@@ -15,8 +15,8 @@ module LintersAndParsers
 
     def self.parse_file(file_result, temporary_repository_path)
       source_file_data = initialize_file_data(file_result, temporary_repository_path)
-      source_file_data['messages'], violations_count = process_messages(file_result['messages'])
-      [source_file_data, violations_count]
+      source_file_data["messages"], violations_count = process_messages(file_result["messages"])
+      [ source_file_data, violations_count ]
     end
 
     def self.process_file_results(eslint_file_results, temporary_repository_path)
@@ -24,20 +24,20 @@ module LintersAndParsers
       violations_count = 0
 
       eslint_file_results
-        .filter { |file_result| !file_result['messages'].empty? }
+        .filter { |file_result| !file_result["messages"].empty? }
         .each do |file_result|
           file_data, file_violations = parse_file(file_result, temporary_repository_path)
           parsed_check_results << file_data
           violations_count += file_violations
         end
 
-      [parsed_check_results, violations_count]
+      [ parsed_check_results, violations_count ]
     end
 
     def self.initialize_file_data(file_result, temporary_repository_path)
       {
-        'filePath' => file_result['filePath'].partition(temporary_repository_path).last,
-        'messages' => []
+        "filePath" => file_result["filePath"].partition(temporary_repository_path).last,
+        "messages" => []
       }
     end
 
@@ -47,16 +47,16 @@ module LintersAndParsers
 
       messages.each do |message|
         violation_data = {
-          'message' => message['message'],
-          'ruleId' => message['ruleId'],
-          'line' => message['line'],
-          'column' => message['column']
+          "message" => message["message"],
+          "ruleId" => message["ruleId"],
+          "line" => message["line"],
+          "column" => message["column"]
         }
         violations << violation_data
         violations_count += 1
       end
 
-      [violations, violations_count]
+      [ violations, violations_count ]
     end
 
     private_class_method :parse_file, :process_file_results, :initialize_file_data, :process_messages

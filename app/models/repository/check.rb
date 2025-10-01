@@ -2,7 +2,7 @@
 
 class Repository
   class Check < ApplicationRecord
-    belongs_to :repository, class_name: 'Repository', inverse_of: :checks
+    belongs_to :repository, class_name: "Repository", inverse_of: :checks
 
     validates :aasm_state, presence: true
 

@@ -10,13 +10,13 @@ Rails.application.routes.draw do
   get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
 
   # Web UI
-  scope module: 'web' do
-    root 'home#index'
+  scope module: "web" do
+    root "home#index"
 
     # OmniAuth
-    post 'auth/:provider', to: 'auth#request', as: :auth_request
-    get 'auth/:provider/callback', to: 'auth#callback', as: :callback_auth
-    delete 'logout', to: 'auth#logout', as: :logout
+    post "auth/:provider", to: "auth#request", as: :auth_request
+    get "auth/:provider/callback", to: "auth#callback", as: :callback_auth
+    delete "logout", to: "auth#logout", as: :logout
 
     # Repositories and checks
     resources :repositories, only: %i[index show new create] do
@@ -25,7 +25,7 @@ Rails.application.routes.draw do
   end
 
   # API webhook endpoint
-  scope module: 'api' do
-    post 'api/checks', to: 'hooks#github_webhook', as: :api_checks
+  scope module: "api" do
+    post "api/checks", to: "hooks#github_webhook", as: :api_checks
   end
 end

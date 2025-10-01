@@ -8,7 +8,7 @@ require "webmock/minitest"
 WebMock.disable_net_connect!(allow_localhost: true)
 
 OmniAuth.config.test_mode = true
-OmniAuth.config.allowed_request_methods = [:post, :get]
+OmniAuth.config.allowed_request_methods = [ :post, :get ]
 OmniAuth.config.silence_get_warning = true
 OmniAuth.config.mock_auth[:github] = OmniAuth::AuthHash.new(
   provider: "github",
@@ -26,11 +26,11 @@ def stub_github_api_requests
   stub_request(:get, %r{https://api.github.com/repositories/\d+})
     .with(
       headers: {
-        'Accept' => 'application/vnd.github.v3+json',
-        'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
-        'Authorization' => 'token 12345',
-        'Content-Type' => 'application/json',
-        'User-Agent' => 'Octokit Ruby Gem 5.6.1'
+        "Accept" => "application/vnd.github.v3+json",
+        "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+        "Authorization" => "token 12345",
+        "Content-Type" => "application/json",
+        "User-Agent" => "Octokit Ruby Gem 5.6.1"
       }
     )
     .to_return(
@@ -51,11 +51,11 @@ def stub_github_api_requests
   stub_request(:get, "https://api.github.com/user/repos?per_page=100")
     .with(
       headers: {
-        'Accept' => 'application/vnd.github.v3+json',
-        'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
-        'Authorization' => 'token 12345',
-        'Content-Type' => 'application/json',
-        'User-Agent' => 'Octokit Ruby Gem 5.6.1'
+        "Accept" => "application/vnd.github.v3+json",
+        "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+        "Authorization" => "token 12345",
+        "Content-Type" => "application/json",
+        "User-Agent" => "Octokit Ruby Gem 5.6.1"
       }
     )
     .to_return(
@@ -169,7 +169,7 @@ end
 # WebMock stubs for GitHub API calls
 WebMock.stub_request(:get, /api\.github\.com\/repos\/.*\/commits/).to_return(
   status: 200,
-  body: [{ "sha" => "abcdef0123456789" }].to_json,
+  body: [ { "sha" => "abcdef0123456789" } ].to_json,
   headers: { "Content-Type" => "application/json" }
 )
 

@@ -23,12 +23,12 @@ module Web
       begin
         supported_repositories = filter_supported_repos(user_repositories_list)
         @supported_repos_for_select = supported_repositories.map do |repository|
-          [repository[:full_name], repository[:id]]
+          [ repository[:full_name], repository[:id] ]
         end
       rescue StandardError => e
         Rails.logger.error "Failed to fetch repositories: #{e.message}"
         @supported_repos_for_select = []
-        flash.now[:alert] = t('.failed_to_load_repositories') unless Rails.env.production?
+        flash.now[:alert] = t(".failed_to_load_repositories") unless Rails.env.production?
       end
     end
 
@@ -40,13 +40,13 @@ module Web
         begin
           RepositoryUpdateJob.perform_later(@repository, current_user.token)
           CreateRepositoryWebhookJob.perform_later(@repository)
-          redirect_to repositories_url, notice: t('.repository_has_been_added')
+          redirect_to repositories_url, notice: t(".repository_has_been_added")
         rescue StandardError => e
           Rails.logger.error "Failed to enqueue repository jobs: #{e.message}"
-          redirect_to repositories_url, notice: t('.repository_has_been_added') unless Rails.env.production?
+          redirect_to repositories_url, notice: t(".repository_has_been_added") unless Rails.env.production?
         end
       else
-        redirect_to new_repository_path, alert: t('.repository_has_not_been_added')
+        redirect_to new_repository_path, alert: t(".repository_has_not_been_added")
       end
     end
 
@@ -55,7 +55,7 @@ module Web
     def user_repositories_list
       octokit_client_class = ApplicationContainer[:octokit_client]
       github_client = octokit_client_class.new(access_token: current_user.token, auto_paginate: true)
-      
+
       if Rails.env.test?
         begin
           github_client.repos

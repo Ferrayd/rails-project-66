@@ -19,4 +19,3 @@ end
 ApplicationContainer.register(:octokit_client) { Octokit::Client }
 ApplicationContainer.register(:fetch_repo_data) { method(:fetch_repo_data) }
 ApplicationContainer.register(:lint_check) { method(:lint_check) }
-

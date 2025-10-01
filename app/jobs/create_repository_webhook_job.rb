@@ -34,7 +34,7 @@ class CreateRepositoryWebhookJob < ApplicationJob
   def create_webhook(github_client, repository)
     github_client.create_hook(
       repository.github_id,
-      'web',
+      "web",
       webhook_config,
       webhook_options
     )
@@ -43,8 +43,8 @@ class CreateRepositoryWebhookJob < ApplicationJob
   def webhook_config
     {
       url: Rails.application.routes.url_helpers.api_checks_url,
-      content_type: 'json',
-      insecure_ssl: Rails.env.production? ? '0' : '1'
+      content_type: "json",
+      insecure_ssl: Rails.env.production? ? "0" : "1"
     }
   end
 
