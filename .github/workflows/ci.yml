@@ -63,11 +63,22 @@ jobs:
         env:
           RAILS_ENV: test
           # REDIS_URL: redis://localhost:6379/0
+          ROLLBAR_ACCESS_TOKEN: ${{ secrets.ROLLBAR_ACCESS_TOKEN }}
         run: bin/rails db:test:prepare test test:system
 
-      - name: Keep screenshots from failed system tests
-        uses: actions/upload-artifact@v4
+      - name: Report test failure to Rollbar
         if: failure()
+        env:
+          ROLLBAR_ACCESS_TOKEN: ${{ secrets.ROLLBAR_ACCESS_TOKEN }}
+        run: |
+          curl -X POST \
+            -H "X-Rollbar-Access-Token: ${{ secrets.ROLLBAR_ACCESS_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"environment":"test","level":"error","title":"GitHub Actions Test Failure","body":{"message":{"body":"RSpec tests failed in CI"}}}'
+
+      - name: Upload screenshots from failed system tests
+        if: failure()
+        uses: actions/upload-artifact@v4
         with:
           name: screenshots
           path: ${{ github.workspace }}/tmp/screenshots
