@@ -42,7 +42,7 @@ module Web
           CreateRepositoryWebhookJob.perform_later(@repository)
           redirect_to repositories_url, notice: t('.repository_has_been_added')
         rescue StandardError => e
-          Rails.logger.error "Failed to enqueue jobs: #{e.message}"
+          Rails.logger.error "Failed to enqueue repository jobs: #{e.message}"
           redirect_to repositories_url, notice: t('.repository_has_been_added') unless Rails.env.production?
         end
       else
