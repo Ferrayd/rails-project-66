@@ -20,7 +20,8 @@ class CheckRepositoryJob < ApplicationJob
     check.update!(
       passed: results[:passed],
       number_of_violations: results[:violations].size,
-      check_results: results
+      check_results: results,
+      aasm_state: "finished" 
     )
   end
 end

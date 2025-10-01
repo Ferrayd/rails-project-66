@@ -22,15 +22,37 @@ OmniAuth.config.mock_auth[:github] = OmniAuth::AuthHash.new(
   }
 )
 
+def stub_github_api_requests
+  # Стаб для запроса конкретного репозитория
+  stub_request(:get, %r{https://api.github.com/repositories/\d+})
+    .to_return(
+      status: 200,
+      body: {
+        id: 123,
+        full_name: "Hexlet/hexlet-cv",
+        language: "ruby"
+      }.to_json,
+      headers: { "Content-Type" => "application/json" }
+    )
+
+  # Стаб для списка репозиториев пользователя
+  stub_request(:get, "https://api.github.com/user/repos?per_page=100")
+    .to_return(
+      status: 200,
+      body: [].to_json,
+      headers: { "Content-Type" => "application/json" }
+    )
+end
+
 module ActiveSupport
   class TestCase
     parallelize(workers: :number_of_processors)
 
     fixtures :all
-
     setup do
       queue_adapter.perform_enqueued_jobs = true
       queue_adapter.perform_enqueued_at_jobs = true
+      stub_github_api_requests
     end
 
     I18n.default_locale = :en
