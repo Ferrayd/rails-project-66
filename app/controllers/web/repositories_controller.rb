@@ -26,11 +26,8 @@ module Web
           [repository[:full_name], repository[:id]]
         end
       rescue StandardError => e
-        # Log the error for debugging
         Rails.logger.error "Failed to fetch repositories: #{e.message}"
-        # Set an empty array to allow the view to render without error
         @supported_repos_for_select = []
-        # Optionally, set a flash message to inform the user
         flash.now[:alert] = t('.failed_to_load_repositories') unless Rails.env.production?
       end
     end
@@ -40,9 +37,14 @@ module Web
 
       if @repository.save
         authorize @repository
-        RepositoryUpdateJob.perform_later(@repository, current_user.token)
-        CreateRepositoryWebhookJob.perform_later(@repository)
-        redirect_to repositories_url, notice: t('.repository_has_been_added')
+        begin
+          RepositoryUpdateJob.perform_later(@repository, current_user.token)
+          CreateRepositoryWebhookJob.perform_later(@repository)
+          redirect_to repositories_url, notice: t('.repository_has_been_added')
+        rescue StandardError => e
+          Rails.logger.error "Failed to enqueue jobs: #{e.message}"
+          redirect_to repositories_url, notice: t('.repository_has_been_added') unless Rails.env.production?
+        end
       else
         redirect_to new_repository_path, alert: t('.repository_has_not_been_added')
       end
@@ -54,12 +56,10 @@ module Web
       octokit_client_class = ApplicationContainer[:octokit_client]
       github_client = octokit_client_class.new(access_token: current_user.token, auto_paginate: true)
       
-      # In test environment, return mock data if real API call is not possible
       if Rails.env.test?
         begin
           github_client.repos
         rescue WebMock::NetConnectNotAllowedError
-          # Return mock data to match the expected format
           [
             {
               id: 123456,
@@ -74,7 +74,7 @@ module Web
           ]
         end
       else
-        github_client.repos # Perform real API call in non-test environments
+        github_client.repos
       end
     end
 
