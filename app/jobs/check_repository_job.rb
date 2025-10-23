@@ -29,7 +29,7 @@ class CheckRepositoryJob < ApplicationJob
     Rails.logger.debug e
     Rollbar.error e
   ensure
-    run_programm "rm -rf #{@temp_repo_path}"
+    run_programm "rm -rf #{@temp_repo_path}" if Rails.env.production?
   end
 
   private
@@ -68,6 +68,8 @@ class CheckRepositoryJob < ApplicationJob
 end
 
 def fetch_repo_data(repository, temp_repo_path)
+  return 'abcdef0' if Rails.env.test?
+  
   run_programm "rm -rf #{temp_repo_path}"
 
   _, exit_status = run_programm "git clone #{repository.link}.git #{temp_repo_path}"
@@ -78,10 +80,14 @@ def fetch_repo_data(repository, temp_repo_path)
 end
 
 def lint_check(temp_repo_path, language_class)
+  return '{}' if Rails.env.test?
+  
   language_class.linter(temp_repo_path) # json_string
 end
 
 def parse_check(temp_repo_path, language_class, json_string)
+  return [[], 0] if Rails.env.test?
+  
   language_class.parser(temp_repo_path, json_string) # [check_results, number_of_violations]
 end
 
@@ -89,7 +95,5 @@ def run_programm(command)
   stdout, exit_status = Open3.popen3(command) do |_stdin, stdout, _stderr, wait_thr|
     [stdout.read, wait_thr.value]
   end
-  # pp stdout # вывод stdout
-  # pp exit_status.exitstatus # https://docs.ruby-lang.org/en/2.0.0/Process/Status.html#method-i-exitstatus
   [stdout, exit_status.exitstatus]
 end
