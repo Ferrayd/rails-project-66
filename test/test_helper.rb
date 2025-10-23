@@ -197,17 +197,43 @@ WebMock.stub_request(:get, %r{api\.github\.com/user/repos}).to_return(
 WebMock.stub_request(:get, %r{api\.github\.com/repositories/\d+}).to_return(
   status: 200,
   body: {
-    id: 3_504_920_930,
-    full_name: 'Hexlet/hexlet-cv',
+    id: 123_456,
+    full_name: 'test/test-repo',
     language: 'ruby',
-    html_url: 'https://github.com/Hexlet/hexlet-cv',
-    owner: { login: 'Hexlet' },
-    name: 'hexlet-cv',
+    html_url: 'https://github.com/test/test-repo',
+    owner: { login: 'test' },
+    name: 'test-repo',
     created_at: Time.zone.now,
     updated_at: Time.zone.now
   }.to_json,
   headers: { 'Content-Type' => 'application/json' }
 )
+
+# Specific mock for the ID used in tests
+WebMock.stub_request(:get, 'https://api.github.com/repositories/8366034001')
+  .with(
+    headers: {
+      'Accept' => 'application/vnd.github.v3+json',
+      'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+      'Authorization' => 'token 12345',
+      'Content-Type' => 'application/json',
+      'User-Agent' => 'Octokit Ruby Gem 5.6.1'
+    }
+  )
+  .to_return(
+    status: 200,
+    body: {
+      id: 8366034001,
+      full_name: 'test/test-repo',
+      language: 'ruby',
+      html_url: 'https://github.com/test/test-repo',
+      owner: { login: 'test' },
+      name: 'test-repo',
+      created_at: Time.zone.now,
+      updated_at: Time.zone.now
+    }.to_json,
+    headers: { 'Content-Type' => 'application/json' }
+  )
 
 WebMock.stub_request(:get, %r{api\.github\.com/.*}).to_return(
   status: 200,

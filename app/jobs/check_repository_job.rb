@@ -39,6 +39,9 @@ class CheckRepositoryJob < ApplicationJob
     fetch_repo_data = ApplicationContainer[:fetch_repo_data]
     @check.commit_id = fetch_repo_data.call(@check.repository, @temp_repo_path)
     @check.mark_as_fetched!
+  rescue StandardError => e
+    Rails.logger.debug "Fetch error: #{e.message}"
+    raise e
   end
 
   def perform_check
@@ -47,6 +50,9 @@ class CheckRepositoryJob < ApplicationJob
     json_string = lint_check.call(@temp_repo_path, @language_class)
     @check.mark_as_checked!
     json_string
+  rescue StandardError => e
+    Rails.logger.debug "Check error: #{e.message}"
+    raise e
   end
 
   def perform_parse(json_string)
@@ -55,6 +61,9 @@ class CheckRepositoryJob < ApplicationJob
     @check.number_of_violations = number_of_violations
     @check.passed = number_of_violations.zero?
     @check.mark_as_parsed!
+  rescue StandardError => e
+    Rails.logger.debug "Parse error: #{e.message}"
+    raise e
   end
 end
 
