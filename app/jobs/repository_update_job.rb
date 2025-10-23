@@ -3,39 +3,20 @@
 class RepositoryUpdateJob < ApplicationJob
   queue_as :default
 
-  def perform(repository, access_token)
-    octokit_client_class = ApplicationContainer[:octokit_client]
-    github_client = octokit_client_class.new(access_token: access_token, auto_paginate: true)
-
-    github_repository_data = if Rails.env.test?
-                               begin
-                                 github_client.repo(repository.github_id)
-                               rescue WebMock::NetConnectNotAllowedError
-                                 {
-                                   id: repository.github_id,
-                                   html_url: 'https://github.com/testuser/test-repo',
-                                   owner: { login: 'testuser' },
-                                   name: 'test-repo',
-                                   full_name: 'testuser/test-repo',
-                                   language: 'ruby',
-                                   created_at: Time.zone.now,
-                                   updated_at: Time.zone.now
-                                 }
-                               end
-                             else
-                               github_client.repo(repository.github_id)
-                             end
-
-    return false if github_repository_data.nil?
+  def perform(repository, token)
+    octokit_client = ApplicationContainer[:octokit_client]
+    client = octokit_client.new access_token: token, auto_paginate: true
+    github_repo = client.repo(repository.github_id)
+    return false if github_repo.nil?
 
     repository.update(
-      link: github_repository_data[:html_url],
-      owner_name: github_repository_data[:owner][:login],
-      name: github_repository_data[:name],
-      full_name: github_repository_data[:full_name],
-      language: github_repository_data[:language]&.downcase,
-      repo_created_at: github_repository_data[:created_at],
-      repo_updated_at: github_repository_data[:updated_at]
+      link: github_repo[:html_url],
+      owner_name: github_repo[:owner][:login],
+      name: github_repo[:name],
+      full_name: github_repo[:full_name],
+      language: github_repo[:language].downcase,
+      repo_created_at: github_repo[:created_at],
+      repo_updated_at: github_repo[:updated_at]
     )
   end
 end

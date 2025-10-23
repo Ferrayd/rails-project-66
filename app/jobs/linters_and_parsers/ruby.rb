@@ -2,65 +2,37 @@
 
 module LintersAndParsers
   class Ruby
-    def self.linter(temporary_repository_path)
-      stdout_output, _exit_status = run_program "bundle exec rubocop --format json #{temporary_repository_path}"
-      stdout_output
+    def self.linter(temp_repo_path)
+      # run_programm "find #{temp_repo_path} -name '*eslint*.*' -type f -delete"
+      stdout, _exit_status = run_programm "bundle exec rubocop --format json #{temp_repo_path}"
+      stdout # json_string
     end
 
-    def self.parser(temporary_repository_path, linting_results_json)
-      rubocop_file_results = JSON.parse(linting_results_json)['files']
-      process_file_results(rubocop_file_results, temporary_repository_path)
-    end
+    def self.parser(temp_repo_path, json_string)
+      rubocop_data = JSON.parse(json_string) # hash
+      rubocop_files_results = rubocop_data['files'] # array
 
-    def self.process_file_results(rubocop_file_results, temporary_repository_path)
-      parsed_check_results = []
-      violations_count = 0
+      number_of_violations = 0
+      check_results = []
 
-      rubocop_file_results
+      rubocop_files_results
         .filter { |file_result| !file_result['offenses'].empty? }
         .each do |file_result|
-          file_data, file_violations = parse_file(file_result, temporary_repository_path)
-          parsed_check_results << file_data
-          violations_count += file_violations
+        src_file = {}
+        src_file['filePath'] = file_result['path'].partition(temp_repo_path).last
+        src_file['messages'] = []
+        file_result['offenses'].each do |offense|
+          violation = {}
+          violation['message'] = offense['message']
+          violation['ruleId'] = offense['cop_name']
+          violation['line'] = offense['location']['line']
+          violation['column'] = offense['location']['column']
+          src_file['messages'] << violation
+          number_of_violations += 1
         end
-
-      [parsed_check_results, violations_count]
-    end
-
-    def self.parse_file(file_result, temporary_repository_path)
-      source_file_data = initialize_file_data(file_result, temporary_repository_path)
-      source_file_data['messages'], violations_count = process_offenses(file_result['offenses'])
-      [source_file_data, violations_count]
-    end
-
-    def self.initialize_file_data(file_result, temporary_repository_path)
-      {
-        'filePath' => file_result['path'].partition(temporary_repository_path).last,
-        'messages' => []
-      }
-    end
-
-    def self.process_offenses(offenses)
-      ignored_rules = ['Style/FrozenStringLiteralComment', 'Style/StringLiterals', 'Style/HashSyntax']
-      violations = []
-      violations_count = 0
-
-      offenses.each do |offense|
-        next if ignored_rules.include?(offense['cop_name'])
-
-        violation_data = {
-          'message' => offense['message'],
-          'ruleId' => offense['cop_name'],
-          'line' => offense['location']['line'],
-          'column' => offense['location']['column']
-        }
-        violations << violation_data
-        violations_count += 1
+        check_results << src_file
       end
-
-      [violations, violations_count]
+      [check_results, number_of_violations]
     end
-
-    private_class_method :process_file_results, :parse_file, :initialize_file_data, :process_offenses
   end
 end

@@ -20,16 +20,8 @@ module Web
       @repository = Repository.new
       authorize @repository
 
-      begin
-        supported_repositories = filter_supported_repos(user_repositories_list)
-        @supported_repos_for_select = supported_repositories.map do |repository|
-          [repository[:full_name], repository[:id]]
-        end
-      rescue StandardError => e
-        Rails.logger.error "Failed to fetch repositories: #{e.message}"
-        @supported_repos_for_select = []
-        flash.now[:alert] = t('.failed_to_load_repositories') unless Rails.env.production?
-      end
+      filtered_repos = filter_supported_repos(user_repos_list)
+      @supported_repos_for_select = filtered_repos.map { |repo| [repo[:full_name], repo[:id]] }
     end
 
     def create
@@ -37,14 +29,9 @@ module Web
 
       if @repository.save
         authorize @repository
-        begin
-          RepositoryUpdateJob.perform_later(@repository, current_user.token)
-          CreateRepositoryWebhookJob.perform_later(@repository)
-          redirect_to repositories_url, notice: t('.repository_has_been_added')
-        rescue StandardError => e
-          Rails.logger.error "Failed to enqueue repository jobs: #{e.message}"
-          redirect_to repositories_url, notice: t('.repository_has_been_added') unless Rails.env.production?
-        end
+        RepositoryUpdateJob.perform_later(@repository, current_user.token)
+        CreateRepositoryWebhookJob.perform_later(@repository)
+        redirect_to repositories_url, notice: t('.repository_has_been_added')
       else
         redirect_to new_repository_path, alert: t('.repository_has_not_been_added')
       end
@@ -52,34 +39,14 @@ module Web
 
     private
 
-    def user_repositories_list
-      octokit_client_class = ApplicationContainer[:octokit_client]
-      github_client = octokit_client_class.new(access_token: current_user.token, auto_paginate: true)
-
-      if Rails.env.test?
-        begin
-          github_client.repos
-        rescue WebMock::NetConnectNotAllowedError
-          [
-            {
-              id: 123_456,
-              full_name: 'testuser/test-repo',
-              language: 'ruby',
-              html_url: 'https://github.com/testuser/test-repo',
-              owner: { login: 'testuser' },
-              name: 'test-repo',
-              created_at: Time.zone.now,
-              updated_at: Time.zone.now
-            }
-          ]
-        end
-      else
-        github_client.repos
-      end
+    def user_repos_list
+      octokit_client = ApplicationContainer[:octokit_client]
+      client = octokit_client.new access_token: current_user.token, auto_paginate: true
+      client.repos # получение списка репозиториев
     end
 
-    def filter_supported_repos(repositories)
-      repositories.filter { |repository| SUPPORTED_LANGUAGES.include?(repository[:language]&.downcase) }
+    def filter_supported_repos(repos)
+      repos.filter { |repo| SUPPORTED_LANGUAGES.include?(repo[:language]&.downcase) }
     end
 
     def set_repository
