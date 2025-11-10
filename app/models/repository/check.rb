@@ -57,15 +57,15 @@ class Repository
     def pending?
       !finished? && !failed?
     end
-    
+
     private
 
     def set_default_state
-      self.aasm_state ||= "created"
+      self.aasm_state ||= 'created'
     end
 
     def ensure_repository_language
-      repository.language ||= "ruby"
+      repository.language ||= 'ruby'
     end
   end
 end

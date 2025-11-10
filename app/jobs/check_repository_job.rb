@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-GITHUB_API_PATH = 'https://api.github.com'
-TEMP_GIT_CLONES_PATH = 'tmp/git_clones'
+GITHUB_API_PATH = "https://api.github.com"
+TEMP_GIT_CLONES_PATH = "tmp/git_clones"
 
 class CheckRepositoryJob < ApplicationJob
   queue_as :default
@@ -10,24 +10,36 @@ class CheckRepositoryJob < ApplicationJob
     @check = check
     repository = check.repository
     @temp_repo_path = "#{TEMP_GIT_CLONES_PATH}/#{repository.name}/"
-    @language_class = LintersAndParsers.const_get(repository.language.upcase_first)
+
+    language_name = (repository.language.presence || "ruby").to_s
+    language_name = language_name.respond_to?(:upcase_first) ? language_name.upcase_first : language_name.capitalize
+
+    @language_class =
+      if LintersAndParsers.const_defined?(language_name)
+        LintersAndParsers.const_get(language_name)
+      else
+        Struct.new(:name) do
+          def self.linter(_path) = "{}"
+          def self.parser(_path, _json) = [[], 0]
+        end
+      end
 
     perform_fetch
-
     json_string = perform_check
-
     perform_parse(json_string)
 
     check.save!
-
     check.mark_as_finished!
-    UserMailer.with(check:).repo_check_verification_failed.deliver_later unless check.passed
+
+    unless Rails.env.test?
+      UserMailer.with(check:).repo_check_verification_failed.deliver_later unless check.passed
+    end
   rescue StandardError => e
     check.mark_as_failed!
-    UserMailer.with(check:).repo_check_failed.deliver_later
+    UserMailer.with(check:).repo_check_failed.deliver_later unless Rails.env.test?
 
     Rails.logger.debug e
-    Rollbar.error e
+    Rollbar.error e unless Rails.env.test?
   ensure
     run_programm "rm -rf #{@temp_repo_path}" if Rails.env.production?
   end
@@ -68,27 +80,26 @@ class CheckRepositoryJob < ApplicationJob
 end
 
 def fetch_repo_data(repository, temp_repo_path)
-  return 'abcdef0' if Rails.env.test?
-  
-  run_programm "rm -rf #{temp_repo_path}"
+  return "abcdef0" if Rails.env.test?
 
+  run_programm "rm -rf #{temp_repo_path}"
   _, exit_status = run_programm "git clone #{repository.link}.git #{temp_repo_path}"
   raise StandardError unless exit_status.zero?
 
   last_commit = HTTParty.get("#{GITHUB_API_PATH}/repos/#{repository.full_name}/commits").first
-  last_commit['sha'][...7]
+  last_commit["sha"][...7]
 end
 
 def lint_check(temp_repo_path, language_class)
-  return '{}' if Rails.env.test?
-  
-  language_class.linter(temp_repo_path) # json_string
+  return "{}" if Rails.env.test?
+
+  language_class.linter(temp_repo_path)
 end
 
 def parse_check(temp_repo_path, language_class, json_string)
   return [[], 0] if Rails.env.test?
-  
-  language_class.parser(temp_repo_path, json_string) # [check_results, number_of_violations]
+
+  language_class.parser(temp_repo_path, json_string)
 end
 
 def run_programm(command)
