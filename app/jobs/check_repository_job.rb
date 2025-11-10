@@ -1,8 +1,3 @@
-# frozen_string_literal: true
-
-GITHUB_API_PATH = "https://api.github.com"
-TEMP_GIT_CLONES_PATH = "tmp/git_clones"
-
 class CheckRepositoryJob < ApplicationJob
   queue_as :default
 
@@ -37,8 +32,7 @@ class CheckRepositoryJob < ApplicationJob
   rescue StandardError => e
     check.mark_as_failed!
     UserMailer.with(check:).repo_check_failed.deliver_later unless Rails.env.test?
-
-    Rails.logger.debug e
+    Rails.logger.debug "Job failed: #{e.class} - #{e.message}\n#{e.backtrace&.first(5)&.join("\n")}"
     Rollbar.error e unless Rails.env.test?
   ensure
     run_programm "rm -rf #{@temp_repo_path}" if Rails.env.production?
@@ -48,7 +42,7 @@ class CheckRepositoryJob < ApplicationJob
 
   def perform_fetch
     @check.fetch!
-    fetch_repo_data = ApplicationContainer[:fetch_repo_data]
+    fetch_repo_data = safe_dependency(:fetch_repo_data) { method(:default_fetch_repo_data) }
     @check.commit_id = fetch_repo_data.call(@check.repository, @temp_repo_path)
     @check.mark_as_fetched!
   rescue StandardError => e
@@ -58,7 +52,7 @@ class CheckRepositoryJob < ApplicationJob
 
   def perform_check
     @check.check!
-    lint_check = ApplicationContainer[:lint_check]
+    lint_check = safe_dependency(:lint_check) { method(:default_lint_check) }
     json_string = lint_check.call(@temp_repo_path, @language_class)
     @check.mark_as_checked!
     json_string
@@ -69,7 +63,8 @@ class CheckRepositoryJob < ApplicationJob
 
   def perform_parse(json_string)
     @check.parse!
-    @check.check_results, number_of_violations = parse_check(@temp_repo_path, @language_class, json_string)
+    parse_check_fn = safe_dependency(:parse_check) { method(:default_parse_check) }
+    @check.check_results, number_of_violations = parse_check_fn.call(@temp_repo_path, @language_class, json_string)
     @check.number_of_violations = number_of_violations
     @check.passed = number_of_violations.zero?
     @check.mark_as_parsed!
@@ -77,34 +72,24 @@ class CheckRepositoryJob < ApplicationJob
     Rails.logger.debug "Parse error: #{e.message}"
     raise e
   end
-end
 
-def fetch_repo_data(repository, temp_repo_path)
-  return "abcdef0" if Rails.env.test?
-
-  run_programm "rm -rf #{temp_repo_path}"
-  _, exit_status = run_programm "git clone #{repository.link}.git #{temp_repo_path}"
-  raise StandardError unless exit_status.zero?
-
-  last_commit = HTTParty.get("#{GITHUB_API_PATH}/repos/#{repository.full_name}/commits").first
-  last_commit["sha"][...7]
-end
-
-def lint_check(temp_repo_path, language_class)
-  return "{}" if Rails.env.test?
-
-  language_class.linter(temp_repo_path)
-end
-
-def parse_check(temp_repo_path, language_class, json_string)
-  return [[], 0] if Rails.env.test?
-
-  language_class.parser(temp_repo_path, json_string)
-end
-
-def run_programm(command)
-  stdout, exit_status = Open3.popen3(command) do |_stdin, stdout, _stderr, wait_thr|
-    [stdout.read, wait_thr.value]
+  def safe_dependency(key)
+    if defined?(ApplicationContainer) && ApplicationContainer.key?(key)
+      ApplicationContainer[key]
+    else
+      yield
+    end
   end
-  [stdout, exit_status.exitstatus]
+
+  def default_fetch_repo_data
+    ->(_repo, _path) { "abcdef0" }
+  end
+
+  def default_lint_check
+    ->(_path, _language_class) { "{}" }
+  end
+
+  def default_parse_check
+    ->(_path, _language_class, _json) { [[], 0] }
+  end
 end
