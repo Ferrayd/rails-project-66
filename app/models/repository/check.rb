@@ -2,6 +2,8 @@
 
 class Repository
   class Check < ApplicationRecord
+    before_validation :set_default_state
+    before_create :ensure_repository_language
     belongs_to :repository, class_name: 'Repository', inverse_of: :checks
 
     validates :aasm_state, presence: true
@@ -54,6 +56,16 @@ class Repository
 
     def pending?
       !finished? && !failed?
+    end
+    
+    private
+
+    def set_default_state
+      self.aasm_state ||= "created"
+    end
+
+    def ensure_repository_language
+      repository.language ||= "ruby"
     end
   end
 end
