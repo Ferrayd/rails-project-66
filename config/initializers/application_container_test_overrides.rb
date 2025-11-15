@@ -7,15 +7,32 @@ if Rails.env.test?
 
     def repos
       [
-        { id: 1, full_name: 'user/test-repo', language: 'ruby', default_branch: 'main' },
-        { id: 2, full_name: 'user/js-repo', language: 'javascript', default_branch: 'main' }
+        {
+          id: 1,
+          full_name: 'user/test-repo',
+          language: 'Ruby',
+          default_branch: 'main'
+        },
+        {
+          id: 2,
+          full_name: 'user/js-repo',
+          language: 'Javascript',
+          default_branch: 'main'
+        }
       ]
     end
 
-    def repo(id)
-      { id: id, full_name: 'user/test-repo', language: 'ruby', default_branch: 'main' }
+    def repo(_github_id)
+      {
+        html_url: 'https://github.com/user/test-repo',
+        owner: { login: 'user' },
+        name: 'test-repo',
+        full_name: 'user/test-repo',
+        language: 'Ruby',
+        created_at: Time.now,
+        updated_at: Time.now
+      }
     end
-
   end
 
   ApplicationContainer.register(:octokit_client) { FakeOctokitClient }
@@ -25,6 +42,10 @@ if Rails.env.test?
       repository.language ||= 'ruby'
       repository.name ||= 'test-repo'
       repository.full_name ||= 'user/test-repo'
+      repository.link ||= 'https://github.com/user/test-repo'
+      repository.owner_name ||= 'user'
+      repository.repo_created_at ||= Time.now
+      repository.repo_updated_at ||= Time.now
 
       'abcdef0'
     end
