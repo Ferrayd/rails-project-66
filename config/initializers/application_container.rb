@@ -15,7 +15,8 @@ class ApplicationContainer
   end
 end
 
-# Default registrations for app and tests
+# Default registrations for all environments
 ApplicationContainer.register(:octokit_client) { Octokit::Client }
 ApplicationContainer.register(:fetch_repo_data) { method(:fetch_repo_data) }
-ApplicationContainer.register(:lint_check) { method(:lint_check) }
+ApplicationContainer.register(:lint_check)      { method(:lint_check) }
+ApplicationContainer.register(:parse_check)     { method(:parse_check) }
