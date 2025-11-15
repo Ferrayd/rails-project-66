@@ -1,52 +1,40 @@
 # frozen_string_literal: true
 
 if Rails.env.test?
-  # Полная подмена Octokit-клиента
+
   class FakeOctokitClient
-    def initialize(token: nil)
-    end
+    def initialize(access_token: nil, auto_paginate: nil); end
 
-    def repo(repo_id)
-      {
-        id: repo_id,
-        full_name: "test/repo",
-        default_branch: "main",
-        language: "Ruby"
-      }
-    end
-
-    def repos(*)
+    def repos
       [
-        {
-          id: 1,
-          full_name: "test/repo1",
-          default_branch: "main",
-          language: "Ruby"
-        }
+        { id: 1, full_name: 'user/test-repo', language: 'ruby', default_branch: 'main' },
+        { id: 2, full_name: 'user/js-repo', language: 'javascript', default_branch: 'main' }
       ]
     end
+
+    def repo(id)
+      { id: id, full_name: 'user/test-repo', language: 'ruby', default_branch: 'main' }
+    end
+
   end
 
-  ApplicationContainer.register(:octokit_client) do
-    FakeOctokitClient.new
-  end
+  ApplicationContainer.register(:octokit_client) { FakeOctokitClient }
 
   ApplicationContainer.register(:fetch_repo_data) do
-    ->(_repo_id) do
-      {
-        id: 123,
-        full_name: "test/repo",
-        default_branch: "main",
-        language: "Ruby"
-      }
+    ->(repository, _temp_repo_path) do
+      repository.language ||= 'ruby'
+      repository.name ||= 'test-repo'
+      repository.full_name ||= 'user/test-repo'
+
+      'abcdef0'
     end
   end
 
   ApplicationContainer.register(:lint_check) do
-    ->(_path, _lang) { "{}" }
+    ->(_temp_repo_path, _language_class) { '{}' }
   end
 
   ApplicationContainer.register(:parse_check) do
-    ->(_path, _lang, _json) { [[], 0] }
+    ->(_temp_repo_path, _language_class, _json_string) { [[], 0] }
   end
 end
