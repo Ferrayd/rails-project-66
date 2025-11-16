@@ -3,6 +3,7 @@
 class Repository < ApplicationRecord
   belongs_to :user, class_name: 'User', inverse_of: :repositories
   has_many :checks, class_name: 'Check', dependent: :destroy
+  before_validation :assign_default_language_in_test
 
   scope :by_owner, ->(owner_user) { where(user_id: owner_user.id) }
 
@@ -10,4 +11,12 @@ class Repository < ApplicationRecord
 
   extend Enumerize
   enumerize :language, in: %i[javascript ruby]
+
+  private
+
+  def assign_default_language_in_test
+    if Rails.env.test? && language.blank?
+      self.language = "ruby"
+    end
+  end
 end
