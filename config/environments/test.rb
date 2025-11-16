@@ -7,8 +7,8 @@ require 'active_support/core_ext/integer/time'
 # your test database is "scratch space" for the test suite and is wiped
 # and recreated between test runs. Don't rely on the data there!
 Rails.application.config.to_prepare do
-  require Rails.root.join("app/containers/application_container_test")
-  require Rails.root.join("config/initializers/application_container_test_overrides.rb")
+  require Rails.root.join('app/containers/application_container_test')
+  require Rails.root.join('config/initializers/application_container_test_overrides.rb')
 end
 
 Rails.application.configure do

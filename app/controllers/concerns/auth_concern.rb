@@ -15,7 +15,9 @@ module AuthConcern
   end
 
   def current_user
-    @current_user ||= User.find_by(id: session[:user_id])
+    return @current_user if defined?(@current_user)
+
+    @current_user = User.find_by(id: session[:user_id])
   end
 
   class NotAuthenticatedError < StandardError; end

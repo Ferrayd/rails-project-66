@@ -40,7 +40,7 @@ class CheckRepositoryJob < ApplicationJob
     @check.commit_id = fetch_repo_data.call(@check.repository, @temp_repo_path)
     @check.mark_as_fetched!
   rescue StandardError => e
-    Rails.logger.debug "Fetch error: #{e.message}"
+    Rails.logger.debug { "Fetch error: #{e.message}" }
     raise e
   end
 
@@ -51,7 +51,7 @@ class CheckRepositoryJob < ApplicationJob
     @check.mark_as_checked!
     json_string
   rescue StandardError => e
-    Rails.logger.debug "Check error: #{e.message}"
+    Rails.logger.debug { "Check error: #{e.message}" }
     raise e
   end
 
@@ -62,13 +62,13 @@ class CheckRepositoryJob < ApplicationJob
     @check.passed = number_of_violations.zero?
     @check.mark_as_parsed!
   rescue StandardError => e
-    Rails.logger.debug "Parse error: #{e.message}"
+    Rails.logger.debug { "Parse error: #{e.message}" }
     raise e
   end
 end
 
 def fetch_repo_data(repository, temp_repo_path)
-  return "abcdef0" if Rails.env.test?
+  return 'abcdef0' if Rails.env.test?
 
   run_programm "rm -rf #{temp_repo_path}"
 
@@ -81,16 +81,15 @@ def fetch_repo_data(repository, temp_repo_path)
   commit.sha[0..6]
 end
 
-
 def lint_check(temp_repo_path, language_class)
   return '{}' if Rails.env.test?
-  
+
   language_class.linter(temp_repo_path) # json_string
 end
 
 def parse_check(temp_repo_path, language_class, json_string)
   return [[], 0] if Rails.env.test?
-  
+
   language_class.parser(temp_repo_path, json_string) # [check_results, number_of_violations]
 end
 

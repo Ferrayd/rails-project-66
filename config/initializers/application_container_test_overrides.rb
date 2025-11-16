@@ -29,8 +29,8 @@ if Rails.env.test?
         name: 'test-repo',
         full_name: 'user/test-repo',
         language: 'Ruby',
-        created_at: Time.now,
-        updated_at: Time.now
+        created_at: Time.zone.now,
+        updated_at: Time.zone.now
       }
     end
   end
@@ -38,14 +38,14 @@ if Rails.env.test?
   ApplicationContainer.register(:octokit_client) { FakeOctokitClient }
 
   ApplicationContainer.register(:fetch_repo_data) do
-    ->(repository, _temp_repo_path) do
+    lambda do |repository, _temp_repo_path|
       repository.language ||= 'ruby'
       repository.name ||= 'test-repo'
       repository.full_name ||= 'user/test-repo'
       repository.link ||= 'https://github.com/user/test-repo'
       repository.owner_name ||= 'user'
-      repository.repo_created_at ||= Time.now
-      repository.repo_updated_at ||= Time.now
+      repository.repo_created_at ||= Time.zone.now
+      repository.repo_updated_at ||= Time.zone.now
 
       'abcdef0'
     end

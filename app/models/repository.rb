@@ -10,13 +10,14 @@ class Repository < ApplicationRecord
   validates :github_id, presence: true, uniqueness: true, numericality: { only_integer: true }
 
   extend Enumerize
+
   enumerize :language, in: %i[javascript ruby]
 
   private
 
   def assign_default_language_in_test
-    if Rails.env.test? && language.blank?
-      self.language = "ruby"
-    end
+    return unless Rails.env.test? && language.blank?
+
+    self.language = 'ruby'
   end
 end
