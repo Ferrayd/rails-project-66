@@ -130,45 +130,9 @@ module ActionDispatch
   end
 end
 
-# Register test doubles in the DI container to avoid external calls
-ApplicationContainer.register(:octokit_client) do
-  Class.new do
-    def initialize(access_token:, auto_paginate: true); end
-
-    def repo(_id)
-      {
-        html_url: 'https://github.com/example/repo',
-        owner: { login: 'owner' },
-        name: 'repo',
-        full_name: 'owner/repo',
-        language: 'ruby',
-        created_at: Time.zone.now,
-        updated_at: Time.zone.now
-      }
-    end
-
-    def repos
-      [
-        { id: 123_456, full_name: 'owner/repo', language: 'ruby' }
-      ]
-    end
-  end
-end
-
-ApplicationContainer.register(:fetch_repo_data) do
-  ->(_repository, _tmp_path) { 'abcdef0' }
-end
-
-ApplicationContainer.register(:lint_check) do
-  ->(_tmp_path, _parser_class) { '{}' }
-end
-
-# Stub webhook creation
-class CreateRepositoryWebhookJob
-  def perform(repository)
-    Rails.logger.debug { "Webhook creation stubbed for repository #{repository.id}" }
-  end
-end
+# Stub webhook creation для тестов
+# Регистрация зависимостей теперь происходит автоматически в lib/application_container.rb
+# в зависимости от окружения (test vs production/development)
 
 # WebMock stubs for GitHub API calls
 WebMock.stub_request(:get, %r{api\.github\.com/repos/.*/commits}).to_return(

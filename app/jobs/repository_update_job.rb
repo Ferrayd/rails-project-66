@@ -4,7 +4,7 @@ class RepositoryUpdateJob < ApplicationJob
   queue_as :default
 
   def perform(repository, token)
-    octokit_client = ApplicationContainer[:octokit_client]
+    octokit_client = ApplicationContainer[:github_client]
     client = octokit_client.new access_token: token, auto_paginate: true
     github_repo = client.repo(repository.github_id)
     return false if github_repo.nil?

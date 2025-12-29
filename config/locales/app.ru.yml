@@ -80,6 +80,7 @@ ru:
           Message: Сообщение
           rule_id: Идентификатор правила
           "Line:Column": Строка и символ
+          no_violations_found: Замечания не найдены
         create:
           wait_for_the_previous_check_to_complete: Дождитесь завершения предыдущей проверки
           check_created: Проверка запущена

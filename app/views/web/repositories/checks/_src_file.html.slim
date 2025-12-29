@@ -1,11 +1,12 @@
 tr
   td[colspan="3"]
     = link_to src_file['filePath'], "#{@repository.link}/tree/#{@check.commit_id}/#{src_file['filePath']}"
-- src_file['messages'].each do |message|
-  tr
-    td
-      = message['message']
-    td
-      = message['ruleId']
-    td
-      = "#{message['line']}:#{message['column']}"
+- if src_file['messages'].present? && src_file['messages'].is_a?(Array)
+  - src_file['messages'].each do |message|
+    tr
+      td
+        = message['message']
+      td
+        = message['ruleId']
+      td
+        = "#{message['line']}:#{message['column']}"

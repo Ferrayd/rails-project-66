@@ -18,9 +18,24 @@ class CheckRepositoryJob < ApplicationJob
 
     perform_parse(json_string)
 
+    # Сохраняем все изменения перед финализацией
     check.save!
 
+    # Убеждаемся, что passed установлен правильно перед финализацией
+    # Используем reload чтобы убедиться, что мы работаем с актуальными данными
+    check.reload
+    violations_count = check.number_of_violations.to_i
+    check.passed = violations_count.zero?
+    
+    Rails.logger.debug { "Before finish: violations=#{violations_count}, passed=#{check.passed}" }
+    
+    check.save!
     check.mark_as_finished!
+    
+    # Проверяем финальное состояние после mark_as_finished
+    check.reload
+    Rails.logger.debug { "After finish: violations=#{check.number_of_violations}, passed=#{check.passed}, state=#{check.aasm_state}" }
+    
     UserMailer.with(check:).repo_check_verification_failed.deliver_later unless check.passed
   rescue StandardError => e
     check.mark_as_failed!
@@ -57,45 +72,25 @@ class CheckRepositoryJob < ApplicationJob
 
   def perform_parse(json_string)
     @check.parse!
-    @check.check_results, number_of_violations = parse_check(@temp_repo_path, @language_class, json_string)
-    @check.number_of_violations = number_of_violations
-    @check.passed = number_of_violations.zero?
+    parse_check = ApplicationContainer[:parse_check]
+    check_results, number_of_violations = parse_check.call(@temp_repo_path, @language_class, json_string)
+    
+    # Убеждаемся, что check_results - это массив
+    @check.check_results = check_results.is_a?(Array) ? check_results : []
+    
+    # Убеждаемся, что number_of_violations - это число
+    violations_count = number_of_violations.to_i
+    @check.number_of_violations = violations_count
+    
+    # Устанавливаем passed в зависимости от количества нарушений
+    @check.passed = violations_count.zero?
+    
+    Rails.logger.debug { "Parse completed: violations=#{@check.number_of_violations}, passed=#{@check.passed}, results_count=#{@check.check_results.size}" }
+    
     @check.mark_as_parsed!
   rescue StandardError => e
     Rails.logger.debug { "Parse error: #{e.message}" }
+    Rails.logger.debug { e.backtrace.first(5).join("\n") }
     raise e
   end
-end
-
-def fetch_repo_data(repository, temp_repo_path)
-  return 'abcdef0' if Rails.env.test?
-
-  run_programm "rm -rf #{temp_repo_path}"
-
-  _, exit_status = run_programm "git clone #{repository.link}.git #{temp_repo_path}"
-  raise StandardError unless exit_status.zero?
-
-  client = Octokit::Client.new(access_token: repository.user.token)
-
-  commit = client.commits(repository.full_name).first
-  commit.sha[0..6]
-end
-
-def lint_check(temp_repo_path, language_class)
-  return '{}' if Rails.env.test?
-
-  language_class.linter(temp_repo_path) # json_string
-end
-
-def parse_check(temp_repo_path, language_class, json_string)
-  return [[], 0] if Rails.env.test?
-
-  language_class.parser(temp_repo_path, json_string) # [check_results, number_of_violations]
-end
-
-def run_programm(command)
-  stdout, exit_status = Open3.popen3(command) do |_stdin, stdout, _stderr, wait_thr|
-    [stdout.read, wait_thr.value]
-  end
-  [stdout, exit_status.exitstatus]
 end

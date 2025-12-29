@@ -40,5 +40,9 @@ table.table.table-hover.mb-5
       th
         = t('.Line:Column')
   tbody
-
-    == render partial: 'src_file', collection: @check.check_results
+    - if @check.check_results.present? && @check.check_results.is_a?(Array)
+      == render partial: 'src_file', collection: @check.check_results
+    - else
+      tr
+        td[colspan="3"]
+          = t('.no_violations_found')

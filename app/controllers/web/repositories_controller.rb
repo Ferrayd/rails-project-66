@@ -40,7 +40,7 @@ module Web
     private
 
     def user_repos_list
-      octokit_client = ApplicationContainer[:octokit_client]
+      octokit_client = ApplicationContainer[:github_client]
       client = octokit_client.new access_token: current_user.token, auto_paginate: true
       client.repos # получение списка репозиториев
     end
