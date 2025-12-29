@@ -11,9 +11,9 @@ class ApplicationContainer
     require_relative 'test_stubs/bash_runner_stub'
     require_relative 'test_stubs/git_stub'
 
-    register :github_client, -> { GithubClientStub }
-    register :bash_runner, -> { BashRunnerStub }
-    register :git, -> { GitStub }
+    register :github_client, -> { TestStubs::GithubClientStub }
+    register :bash_runner, -> { TestStubs::BashRunnerStub }
+    register :git, -> { TestStubs::GitStub }
 
     # Функции для тестов
     register :fetch_repo_data do
