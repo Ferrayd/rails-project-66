@@ -18,20 +18,20 @@ module LintersAndParsers
       rubocop_files_results
         .filter { |file_result| !file_result['offenses'].empty? }
         .each do |file_result|
-        src_file = {}
-        src_file['filePath'] = file_result['path'].partition(temp_repo_path).last
-        src_file['messages'] = []
-        file_result['offenses'].each do |offense|
-          violation = {}
-          violation['message'] = offense['message']
-          violation['ruleId'] = offense['cop_name']
-          violation['line'] = offense['location']['line']
-          violation['column'] = offense['location']['column']
-          src_file['messages'] << violation
-          number_of_violations += 1
+          src_file = {}
+          src_file['filePath'] = file_result['path'].partition(temp_repo_path).last
+          src_file['messages'] = []
+          file_result['offenses'].each do |offense|
+            violation = {}
+            violation['message'] = offense['message']
+            violation['ruleId'] = offense['cop_name']
+            violation['line'] = offense['location']['line']
+            violation['column'] = offense['location']['column']
+            src_file['messages'] << violation
+            number_of_violations += 1
+          end
+          check_results << src_file
         end
-        check_results << src_file
-      end
       [check_results, number_of_violations]
     end
   end

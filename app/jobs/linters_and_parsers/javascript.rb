@@ -17,20 +17,20 @@ module LintersAndParsers
       eslint_files_results
         .filter { |file_result| !file_result['messages'].empty? }
         .each do |file_result|
-        src_file = {}
-        src_file['filePath'] = file_result['filePath'].partition(temp_repo_path).last
-        src_file['messages'] = []
-        file_result['messages'].each do |message|
-          violation = {}
-          violation['message'] = message['message']
-          violation['ruleId'] = message['ruleId']
-          violation['line'] = message['line']
-          violation['column'] = message['column']
-          src_file['messages'] << violation
-          number_of_violations += 1
+          src_file = {}
+          src_file['filePath'] = file_result['filePath'].partition(temp_repo_path).last
+          src_file['messages'] = []
+          file_result['messages'].each do |message|
+            violation = {}
+            violation['message'] = message['message']
+            violation['ruleId'] = message['ruleId']
+            violation['line'] = message['line']
+            violation['column'] = message['column']
+            src_file['messages'] << violation
+            number_of_violations += 1
+          end
+          check_results << src_file
         end
-        check_results << src_file
-      end
       [check_results, number_of_violations]
     end
   end
