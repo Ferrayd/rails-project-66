@@ -34,7 +34,7 @@ class GithubClientStub
 
   def commits(_full_name)
     [
-      OpenStruct.new(sha: 'abcdef0123456789')
+      { sha: 'abcdef0123456789' }
     ]
   end
 

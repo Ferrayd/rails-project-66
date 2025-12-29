@@ -90,7 +90,6 @@ gem 'enumerize'
 gem 'octokit', '~> 5.0'
 gem 'omniauth-github'
 gem 'omniauth-rails_csrf_protection'
-gem 'rollbar'
 gem 'rubocop-performance', require: false
 gem 'rubocop-rails', require: false
 gem 'simple_form'
