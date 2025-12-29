@@ -81,4 +81,3 @@ def run_programm(command)
   end
   [stdout, exit_status.exitstatus]
 end
-

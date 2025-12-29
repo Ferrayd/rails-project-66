@@ -42,4 +42,3 @@ class GithubClientStub
     { 'id' => 123, 'test_mode' => true }
   end
 end
-
