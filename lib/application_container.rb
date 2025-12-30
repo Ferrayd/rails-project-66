@@ -6,7 +6,6 @@ class ApplicationContainer
   extend Dry::Container::Mixin
 
   if Rails.env.test?
-    # Тестовые заглушки
     require_relative 'test_stubs/github_client_stub'
     require_relative 'test_stubs/bash_runner_stub'
     require_relative 'test_stubs/git_stub'
@@ -15,7 +14,6 @@ class ApplicationContainer
     register :bash_runner, -> { TestStubs::BashRunnerStub }
     register :git, -> { TestStubs::GitStub }
 
-    # Функции для тестов
     register :fetch_repo_data do
       lambda do |repository, _temp_repo_path|
         repository.language ||= 'ruby'
@@ -38,18 +36,15 @@ class ApplicationContainer
       ->(_temp_repo_path, _language_class, _json_string) { [[], 0] }
     end
   else
-    # Боевое/разработка окружение
     register :github_client, -> { Octokit::Client }
     register :bash_runner, -> { BashRunner } if defined?(BashRunner)
     register :git, -> { Git } if defined?(Git)
 
-    # Реальные функции будут определены в check_repository_job.rb
-    # Используем ленивую загрузку через lambda
     register :fetch_repo_data do
       lambda do |repository, temp_repo_path|
         run_programm "rm -rf #{temp_repo_path}"
 
-        _, exit_status = run_programm "git clone #{repository.link}.git #{temp_repo_path}"
+        _, _, exit_status = run_programm "git clone #{repository.link}.git #{temp_repo_path}"
         raise StandardError unless exit_status.zero?
 
         github_client_class = ApplicationContainer[:github_client]
@@ -74,10 +69,16 @@ class ApplicationContainer
   end
 end
 
-# Вспомогательная функция для выполнения команд
 def run_programm(command)
-  stdout, exit_status = Open3.popen3(command) do |_stdin, stdout, _stderr, wait_thr|
-    [stdout.read, wait_thr.value]
+  stdout, stderr, exit_status = Open3.popen3(command) do |_stdin, stdout, stderr, wait_thr|
+    [stdout.read, stderr.read, wait_thr.value]
   end
-  [stdout, exit_status.exitstatus]
+  
+  if exit_status.exitstatus != 0
+    Rails.logger.warn { "Command failed: #{command}" }
+    Rails.logger.warn { "Exit status: #{exit_status.exitstatus}" }
+    Rails.logger.warn { "Stderr: #{stderr}" } unless stderr.empty?
+  end
+  
+  [stdout, stderr, exit_status.exitstatus]
 end

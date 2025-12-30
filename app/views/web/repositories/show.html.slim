@@ -18,11 +18,11 @@ p
 p
   strong.me-2
     = t('.date_of_creation')
-  = repo_created_at && l(repo_created_at.localtime)
+  = repo_created_at && l(repo_created_at.localtime, format: :full_month)
 p
   strong.me-2
     = t('.update_date')
-  = repo_updated_at && l(repo_updated_at.localtime)
+  = repo_updated_at && l(repo_updated_at.localtime, format: :full_month)
 hr
 table.table.table-striped
   thead

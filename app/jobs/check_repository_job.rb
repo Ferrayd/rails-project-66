@@ -9,8 +9,28 @@ class CheckRepositoryJob < ApplicationJob
   def perform(check)
     @check = check
     repository = check.repository
+    
+    # Дебаггер: проверяем состояние репозитория
+    Rails.logger.debug { "CheckRepositoryJob: repository_id=#{repository.id}, language=#{repository.language.inspect}, name=#{repository.name.inspect}" }
+    
+    # Защита от nil language
+    if repository.language.blank?
+      Rails.logger.warn { "CheckRepositoryJob: repository.language is nil for repository_id=#{repository.id}, setting default to 'ruby'" }
+      repository.language ||= 'ruby'
+      repository.save!
+    end
+    
     @temp_repo_path = "#{TEMP_GIT_CLONES_PATH}/#{repository.name}/"
-    @language_class = LintersAndParsers.const_get(repository.language.upcase_first)
+    
+    # Дебаггер: проверяем значение перед преобразованием
+    language_string = repository.language.to_s
+    Rails.logger.debug { "CheckRepositoryJob: language_string=#{language_string.inspect}" }
+    
+    language_class_name = language_string.camelize
+    Rails.logger.debug { "CheckRepositoryJob: language_class_name=#{language_class_name.inspect}" }
+    
+    @language_class = LintersAndParsers.const_get(language_class_name)
+    Rails.logger.debug { "CheckRepositoryJob: @language_class=#{@language_class.inspect}" }
 
     perform_fetch
     json_string = perform_check
@@ -46,11 +66,21 @@ class CheckRepositoryJob < ApplicationJob
   def perform_check
     @check.check!
     lint_check = ApplicationContainer[:lint_check]
+    
+    # Дебаггер: логируем перед вызовом линтера
+    Rails.logger.debug { "CheckRepositoryJob#perform_check: temp_repo_path=#{@temp_repo_path}, language_class=#{@language_class}" }
+    
     json_string = lint_check.call(@temp_repo_path, @language_class)
+    
+    # Дебаггер: логируем результат линтера
+    Rails.logger.debug { "CheckRepositoryJob#perform_check: json_string_length=#{json_string&.length || 0}" }
+    Rails.logger.debug { "CheckRepositoryJob#perform_check: json_string (first 200 chars): #{json_string&.[](0..200) || 'nil'}" }
+    
     @check.mark_as_checked!
     json_string
   rescue StandardError => e
     Rails.logger.debug { "Check error: #{e.message}" }
+    Rails.logger.debug { "Check error backtrace: #{e.backtrace.first(5).join("\n")}" }
     raise e
   end
 

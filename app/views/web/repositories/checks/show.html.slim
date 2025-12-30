@@ -9,7 +9,7 @@ table.table
       td
         = t('.checked_at')
       td
-        = l(@check.updated_at.localtime)
+        = l(@check.updated_at.localtime, format: :full_month)
     tr
       td
         = t('.Status')

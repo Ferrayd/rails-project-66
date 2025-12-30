@@ -65,7 +65,11 @@ class Repository
     end
 
     def ensure_repository_language
-      repository.language ||= 'ruby'
+      return if repository.language.present?
+      
+      Rails.logger.debug { "Check#ensure_repository_language: repository_id=#{repository.id}, language is nil, setting default to 'ruby'" }
+      repository.language = 'ruby'
+      repository.save!
     end
   end
 end

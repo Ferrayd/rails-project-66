@@ -3,7 +3,7 @@
 class Repository < ApplicationRecord
   belongs_to :user, class_name: 'User', inverse_of: :repositories
   has_many :checks, class_name: 'Check', dependent: :destroy
-  before_validation :assign_default_language_in_test
+  before_validation :assign_default_language_if_blank
   after_commit :start_initial_check, on: :create
 
   scope :by_owner, ->(owner_user) { where(user_id: owner_user.id) }
@@ -16,17 +16,16 @@ class Repository < ApplicationRecord
 
   private
 
-  def assign_default_language_in_test
-    return unless Rails.env.test? && language.blank?
+  def assign_default_language_if_blank
+    return if language.present?
 
+    Rails.logger.debug { "Repository#assign_default_language_if_blank: repository_id=#{id}, language is blank, setting default to 'ruby'" }
     self.language = 'ruby'
   end
 
   def start_initial_check
-    # Проверяем, что нет активной проверки
     return if checks.any?(&:pending?)
 
-    # Создаем новую проверку и запускаем её
     check = checks.create!
     CheckRepositoryJob.perform_later(check)
   rescue StandardError => e
