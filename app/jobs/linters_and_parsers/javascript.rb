@@ -5,50 +5,54 @@ module LintersAndParsers
     def self.linter(temp_repo_path)
       # Удаляем старые конфиги eslint (игнорируем результат)
       run_programm "find #{temp_repo_path} -name '*eslint*.*' -type f -delete"
-      
+
       # Дебаггер: логируем команду
       command = "yarn run eslint --format json #{temp_repo_path}"
       Rails.logger.debug { "Javascript.linter: executing command: #{command}" }
-      
+
       stdout, stderr, exit_status = run_programm(command)
-      
+
       # Дебаггер: логируем результат
-      Rails.logger.debug { "Javascript.linter: exit_status=#{exit_status}, stdout_length=#{stdout&.length || 0}, stderr_length=#{stderr&.length || 0}" }
-      
+      Rails.logger.debug do
+        "Javascript.linter: exit_status=#{exit_status}, stdout_length=#{stdout&.length || 0}, stderr_length=#{stderr&.length || 0}"
+      end
+
       # Если команда завершилась с ошибкой, логируем
       if exit_status != 0
         Rails.logger.error { "Javascript.linter: eslint failed with exit_status=#{exit_status}" }
         Rails.logger.error { "Javascript.linter: stderr=#{stderr}" } unless stderr.empty?
         # ESLint может возвращать JSON даже при ошибках, продолжаем обработку
       end
-      
+
       # Проверяем что stdout не пустой
       if stdout.nil? || stdout.strip.empty?
-        Rails.logger.warn { "Javascript.linter: stdout is empty, returning empty JSON" }
+        Rails.logger.warn { 'Javascript.linter: stdout is empty, returning empty JSON' }
         return '[]'
       end
-      
+
       # ESLint выводит JSON на третьей строке (первые две - служебные)
       json_line = stdout.split("\n")[2]
-      
+
       if json_line.nil? || json_line.strip.empty?
-        Rails.logger.warn { "Javascript.linter: JSON line is empty, returning empty array" }
+        Rails.logger.warn { 'Javascript.linter: JSON line is empty, returning empty array' }
         return '[]'
       end
-      
+
       json_line # json_string
     end
 
     def self.parser(temp_repo_path, json_string)
       # Дебаггер: проверяем входные данные
-      Rails.logger.debug { "Javascript.parser: temp_repo_path=#{temp_repo_path}, json_string_length=#{json_string&.length || 0}" }
-      
+      Rails.logger.debug do
+        "Javascript.parser: temp_repo_path=#{temp_repo_path}, json_string_length=#{json_string&.length || 0}"
+      end
+
       # Валидация JSON перед парсингом
       if json_string.nil? || json_string.strip.empty?
-        Rails.logger.warn { "Javascript.parser: json_string is empty or nil, returning empty results" }
+        Rails.logger.warn { 'Javascript.parser: json_string is empty or nil, returning empty results' }
         return [[], 0]
       end
-      
+
       begin
         eslint_files_results = JSON.parse(json_string) # array
       rescue JSON::ParserError => e
@@ -56,13 +60,14 @@ module LintersAndParsers
         Rails.logger.error { "Javascript.parser: json_string (first 500 chars): #{json_string[0..500]}" }
         return [[], 0]
       end
-      
+
       # Проверяем структуру данных
       unless eslint_files_results.is_a?(Array)
-        Rails.logger.warn { "Javascript.parser: unexpected JSON structure (expected Array, got #{eslint_files_results.class}), returning empty results" }
+        Rails.logger.warn do
+          "Javascript.parser: unexpected JSON structure (expected Array, got #{eslint_files_results.class}), returning empty results"
+        end
         return [[], 0]
       end
-      
 
       number_of_violations = 0
       check_results = []

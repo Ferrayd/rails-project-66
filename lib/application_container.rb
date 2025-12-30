@@ -73,12 +73,12 @@ def run_programm(command)
   stdout, stderr, exit_status = Open3.popen3(command) do |_stdin, stdout, stderr, wait_thr|
     [stdout.read, stderr.read, wait_thr.value]
   end
-  
+
   if exit_status.exitstatus != 0
     Rails.logger.warn { "Command failed: #{command}" }
     Rails.logger.warn { "Exit status: #{exit_status.exitstatus}" }
     Rails.logger.warn { "Stderr: #{stderr}" } unless stderr.empty?
   end
-  
+
   [stdout, stderr, exit_status.exitstatus]
 end

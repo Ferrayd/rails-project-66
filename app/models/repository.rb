@@ -19,7 +19,9 @@ class Repository < ApplicationRecord
   def assign_default_language_if_blank
     return if language.present?
 
-    Rails.logger.debug { "Repository#assign_default_language_if_blank: repository_id=#{id}, language is blank, setting default to 'ruby'" }
+    Rails.logger.debug do
+      "Repository#assign_default_language_if_blank: repository_id=#{id}, language is blank, setting default to 'ruby'"
+    end
     self.language = 'ruby'
   end
 
