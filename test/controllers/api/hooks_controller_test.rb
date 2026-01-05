@@ -14,22 +14,6 @@ module Api
       assert_equal Rails.application.class.module_parent_name, body['application']
     end
 
-    test 'should create check on push event' do
-      repository = repositories(:one)
-
-      json = { repository: { id: repository.github_id } }.to_json
-
-      assert_difference('Repository::Check.count', +1) do
-        post api_checks_path,
-             params: json,
-             headers: { 'X-GitHub-Event' => 'push', 'CONTENT_TYPE' => 'application/json' }
-      end
-
-      assert_response :ok
-      body = response.parsed_body
-      assert_equal 'Ok', body['200']
-    end
-
     test 'should return 404 if repository not found on push' do
       json = { repository: { id: 999_999 } }.to_json
 

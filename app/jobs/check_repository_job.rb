@@ -10,12 +10,10 @@ class CheckRepositoryJob < ApplicationJob
     @check = check
     repository = check.repository
 
-    # Дебаггер: проверяем состояние репозитория
     Rails.logger.debug do
       "CheckRepositoryJob: repository_id=#{repository.id}, language=#{repository.language.inspect}, name=#{repository.name.inspect}"
     end
 
-    # Защита от nil language
     if repository.language.blank?
       Rails.logger.warn do
         "CheckRepositoryJob: repository.language is nil for repository_id=#{repository.id}, setting default to 'ruby'"
@@ -26,7 +24,6 @@ class CheckRepositoryJob < ApplicationJob
 
     @temp_repo_path = "#{TEMP_GIT_CLONES_PATH}/#{repository.name}/"
 
-    # Дебаггер: проверяем значение перед преобразованием
     language_string = repository.language.to_s
     Rails.logger.debug { "CheckRepositoryJob: language_string=#{language_string.inspect}" }
 
@@ -71,14 +68,12 @@ class CheckRepositoryJob < ApplicationJob
     @check.check!
     lint_check = ApplicationContainer[:lint_check]
 
-    # Дебаггер: логируем перед вызовом линтера
     Rails.logger.debug do
       "CheckRepositoryJob#perform_check: temp_repo_path=#{@temp_repo_path}, language_class=#{@language_class}"
     end
 
     json_string = lint_check.call(@temp_repo_path, @language_class)
 
-    # Дебаггер: логируем результат линтера
     Rails.logger.debug { "CheckRepositoryJob#perform_check: json_string_length=#{json_string&.length || 0}" }
     Rails.logger.debug do
       "CheckRepositoryJob#perform_check: json_string (first 200 chars): #{json_string&.[](0..200) || 'nil'}"

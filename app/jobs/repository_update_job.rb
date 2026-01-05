@@ -20,7 +20,6 @@ class RepositoryUpdateJob < ApplicationJob
     )
   rescue StandardError => e
     Rails.logger.debug { "RepositoryUpdateJob error: #{e.message}" }
-    # В тестовой среде не падаем, просто логируем ошибку
     raise e unless Rails.env.test?
   end
 end

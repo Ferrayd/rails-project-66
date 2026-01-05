@@ -17,13 +17,7 @@ module LintersAndParsers
         command = "bundle exec rubocop --format json #{temp_repo_path_escaped}"
       end
 
-      Rails.logger.debug { "Ruby.linter: executing command: #{command}" }
-
       stdout, stderr, exit_status = run_programm(command)
-
-      Rails.logger.debug do
-        "Ruby.linter: exit_status=#{exit_status}, stdout_length=#{stdout&.length || 0}, stderr_length=#{stderr&.length || 0}"
-      end
 
       if stdout.nil? || stdout.strip.empty?
         Rails.logger.warn { 'Ruby.linter: stdout is empty, returning empty JSON' }
@@ -48,10 +42,6 @@ module LintersAndParsers
     end
 
     def self.parser(temp_repo_path, json_string)
-      Rails.logger.debug do
-        "Ruby.parser: temp_repo_path=#{temp_repo_path}, json_string_length=#{json_string&.length || 0}"
-      end
-
       if json_string.nil? || json_string.strip.empty?
         Rails.logger.warn { 'Ruby.parser: json_string is empty or nil, returning empty results' }
         return [[], 0]
