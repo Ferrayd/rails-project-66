@@ -7,7 +7,7 @@
 [![CI](https://github.com/Ferrayd/rails-project-66/actions/workflows/ci.yml/badge.svg)](https://github.com/Ferrayd/rails-project-66)
 
 ## Ссылка на проект
-[Деплой на Render](https://rails-project-66-6m3i.onrender.com/)
+[Деплой на Render](https://mysite-lh12.onrender.com/)
 
 ## Локальный запуск
 
