@@ -42,48 +42,68 @@ module LintersAndParsers
     end
 
     def self.parser(temp_repo_path, json_string)
-      if json_string.nil? || json_string.strip.empty?
-        Rails.logger.warn { 'Ruby.parser: json_string is empty or nil, returning empty results' }
-        return [[], 0]
+      return [[], 0] if empty_json_string?(json_string)
+
+      rubocop_data = parse_json(json_string)
+      return [[], 0] unless rubocop_data
+
+      rubocop_files_results = validate_and_extract_files(rubocop_data)
+      return [[], 0] unless rubocop_files_results
+
+      process_rubocop_files(temp_repo_path, rubocop_files_results)
+    end
+
+    def self.empty_json_string?(json_string)
+      return false unless json_string.nil? || json_string.strip.empty?
+
+      Rails.logger.warn { 'Ruby.parser: json_string is empty or nil, returning empty results' }
+      true
+    end
+
+    def self.parse_json(json_string)
+      JSON.parse(json_string)
+    rescue JSON::ParserError => e
+      Rails.logger.error { "Ruby.parser: JSON parse error: #{e.message}" }
+      Rails.logger.error { "Ruby.parser: json_string (first 500 chars): #{json_string[0..500]}" }
+      nil
+    end
+
+    def self.validate_and_extract_files(rubocop_data)
+      if rubocop_data.is_a?(Hash) && rubocop_data['files'].is_a?(Array)
+        return rubocop_data['files']
       end
 
-      begin
-        rubocop_data = JSON.parse(json_string)
-      rescue JSON::ParserError => e
-        Rails.logger.error { "Ruby.parser: JSON parse error: #{e.message}" }
-        Rails.logger.error { "Ruby.parser: json_string (first 500 chars): #{json_string[0..500]}" }
-        return [[], 0]
-      end
+      Rails.logger.warn { 'Ruby.parser: unexpected JSON structure, returning empty results' }
+      Rails.logger.warn { "Ruby.parser: rubocop_data keys: #{rubocop_data.keys.inspect}" }
+      nil
+    end
 
-      unless rubocop_data.is_a?(Hash) && rubocop_data['files'].is_a?(Array)
-        Rails.logger.warn { 'Ruby.parser: unexpected JSON structure, returning empty results' }
-        Rails.logger.warn { "Ruby.parser: rubocop_data keys: #{rubocop_data.keys.inspect}" }
-        return [[], 0]
-      end
-
-      rubocop_files_results = rubocop_data['files']
-
+    def self.process_rubocop_files(temp_repo_path, rubocop_files_results)
       number_of_violations = 0
       check_results = []
 
       rubocop_files_results
         .filter { |file_result| !file_result['offenses'].empty? }
         .each do |file_result|
-          src_file = {}
-          src_file['filePath'] = file_result['path'].partition(temp_repo_path).last
-          src_file['messages'] = []
-          file_result['offenses'].each do |offense|
-            violation = {}
-            violation['message'] = offense['message']
-            violation['ruleId'] = offense['cop_name']
-            violation['line'] = offense['location']['line']
-            violation['column'] = offense['location']['column']
-            src_file['messages'] << violation
-            number_of_violations += 1
-          end
+          src_file = build_src_file(temp_repo_path, file_result)
           check_results << src_file
+          number_of_violations += src_file['messages'].size
         end
       [check_results, number_of_violations]
+    end
+
+    def self.build_src_file(temp_repo_path, file_result)
+      src_file = {}
+      src_file['filePath'] = file_result['path'].partition(temp_repo_path).last
+      src_file['messages'] = file_result['offenses'].map do |offense|
+        {
+          'message' => offense['message'],
+          'ruleId' => offense['cop_name'],
+          'line' => offense['location']['line'],
+          'column' => offense['location']['column']
+        }
+      end
+      src_file
     end
   end
 end

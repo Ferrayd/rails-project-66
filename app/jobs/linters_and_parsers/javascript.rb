@@ -34,49 +34,66 @@ module LintersAndParsers
     end
 
     def self.parser(temp_repo_path, json_string)
-      # Валидация JSON перед парсингом
-      if json_string.nil? || json_string.strip.empty?
-        Rails.logger.warn { 'Javascript.parser: json_string is empty or nil, returning empty results' }
-        return [[], 0]
-      end
+      return [[], 0] if empty_json_string?(json_string)
 
-      begin
-        eslint_files_results = JSON.parse(json_string) # array
-      rescue JSON::ParserError => e
-        Rails.logger.error { "Javascript.parser: JSON parse error: #{e.message}" }
-        Rails.logger.error { "Javascript.parser: json_string (first 500 chars): #{json_string[0..500]}" }
-        return [[], 0]
-      end
+      eslint_files_results = parse_json(json_string)
+      return [[], 0] unless eslint_files_results
 
-      # Проверяем структуру данных
-      unless eslint_files_results.is_a?(Array)
-        Rails.logger.warn do
-          "Javascript.parser: unexpected JSON structure (expected Array, got #{eslint_files_results.class}), returning empty results"
-        end
-        return [[], 0]
-      end
+      return [[], 0] unless valid_array_structure?(eslint_files_results)
 
+      process_eslint_files(temp_repo_path, eslint_files_results)
+    end
+
+    def self.empty_json_string?(json_string)
+      return false unless json_string.nil? || json_string.strip.empty?
+
+      Rails.logger.warn { 'Javascript.parser: json_string is empty or nil, returning empty results' }
+      true
+    end
+
+    def self.parse_json(json_string)
+      JSON.parse(json_string)
+    rescue JSON::ParserError => e
+      Rails.logger.error { "Javascript.parser: JSON parse error: #{e.message}" }
+      Rails.logger.error { "Javascript.parser: json_string (first 500 chars): #{json_string[0..500]}" }
+      nil
+    end
+
+    def self.valid_array_structure?(eslint_files_results)
+      return true if eslint_files_results.is_a?(Array)
+
+      Rails.logger.warn do
+        "Javascript.parser: unexpected JSON structure (expected Array, got #{eslint_files_results.class}), returning empty results"
+      end
+      false
+    end
+
+    def self.process_eslint_files(temp_repo_path, eslint_files_results)
       number_of_violations = 0
       check_results = []
 
       eslint_files_results
         .filter { |file_result| !file_result['messages'].empty? }
         .each do |file_result|
-          src_file = {}
-          src_file['filePath'] = file_result['filePath'].partition(temp_repo_path).last
-          src_file['messages'] = []
-          file_result['messages'].each do |message|
-            violation = {}
-            violation['message'] = message['message']
-            violation['ruleId'] = message['ruleId']
-            violation['line'] = message['line']
-            violation['column'] = message['column']
-            src_file['messages'] << violation
-            number_of_violations += 1
-          end
+          src_file = build_src_file(temp_repo_path, file_result)
           check_results << src_file
+          number_of_violations += src_file['messages'].size
         end
       [check_results, number_of_violations]
+    end
+
+    def self.build_src_file(temp_repo_path, file_result)
+      src_file = {}
+      src_file['filePath'] = file_result['filePath'].partition(temp_repo_path).last
+      src_file['messages'] = file_result['messages'].map do |message|
+        {
+          'message' => message['message'],
+          'ruleId' => message['ruleId'],
+          'line' => message['line'],
+          'column' => message['column']
+        }
+      end
+      src_file
     end
   end
 end
