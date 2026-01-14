@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 class CreateRepositoryWebhookJob < ApplicationJob
   queue_as :default
 
@@ -7,11 +5,11 @@ class CreateRepositoryWebhookJob < ApplicationJob
     return if Rails.env.test?
 
     user_token = repository.user.token
-
     octokit_client = ApplicationContainer[:github_client]
     client = octokit_client.new(access_token: user_token, auto_paginate: true)
 
-    url = Rails.application.routes.url_helpers.api_checks_url
+    url = Rails.application.routes.url_helpers.api_checks_url(host: ENV['APP_HOST'])
+    
     hook_info = client.create_hook(
       repository.github_id,
       'web',
@@ -21,13 +19,14 @@ class CreateRepositoryWebhookJob < ApplicationJob
         insecure_ssl: Rails.env.production? ? '0' : '1'
       },
       {
-        events: %w[push],
+        events: ['push'],
         active: true
       }
     )
 
-    Rails.logger.debug { "hook_info = #{hook_info}\n" }
+    Rails.logger.info("Webhook created for #{repository.full_name}: #{hook_info.id}")
   rescue StandardError => e
-    Rails.logger.debug { "Webhook creation failed: #{e.class} - #{e.message}" }
+    Rails.logger.error("Webhook creation failed for #{repository.full_name}: #{e.class} - #{e.message}")
+    raise e 
   end
 end
