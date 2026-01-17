@@ -86,7 +86,7 @@ group :production do
 end
 
 gem 'enumerize'
-gem 'octokit', '~> 5.0'
+gem 'octokit', '~> 10.0'
 gem 'omniauth-github'
 gem 'omniauth-rails_csrf_protection'
 gem 'rollbar'
